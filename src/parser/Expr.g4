@@ -1,9 +1,9 @@
-grammar expr;
+grammar Expr;
 
 expression returns [int value]
     :   mult { int m1 = $mult.value; }
         pm   { int tt=$pm.value; }
-        mult { $value = interp(m1, tt, $mult.value); }
+        mult { $value = ExprEvaluator.interp(m1, tt, $mult.value); }
     ;
 
 pm returns [int value]
@@ -14,7 +14,7 @@ pm returns [int value]
 mult returns [int value]
     :   term { int t1 = $term.value; }
         md   { int tt=$md.value; }
-        term { $value = iterp(t1, tt, $term.value); }
+        term { $value = ExprEvaluator.interp(t1, tt, $term.value); }
     ;
 
 md returns [int value]
