@@ -41,6 +41,12 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>org.isu.oberon.Main</mainClass>
+                    <executable>maven</executable>
+                    <!-- optional -->
+                    <!-- <workingDirectory>/tmp</workingDirectory> -->
+                    <arguments>
+                        <argument>src/test/DATA/test_expr.txt</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
