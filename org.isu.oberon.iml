@@ -14,6 +14,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.7.1" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:javacpp:1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:llvm-platform:5.0.1-1.4" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:llvm:5.0.1-1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:llvm:linux-x86:5.0.1-1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:llvm:linux-x86_64:5.0.1-1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:llvm:macosx-x86_64:5.0.1-1.4" level="project" />
   </component>
 </module>
