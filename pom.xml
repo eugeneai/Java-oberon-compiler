@@ -20,6 +20,17 @@
             <artifactId>antlr4-runtime</artifactId>
             <version>4.7.1</version>
         </dependency>
+        <!-- https://github.com/bytedeco/javacpp-presets/tree/master/llvm -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacpp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>llvm</artifactId>
+            <version>5.0.1-1.4</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

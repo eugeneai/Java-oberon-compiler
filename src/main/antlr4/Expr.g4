@@ -1,5 +1,10 @@
 grammar Expr;
 
+@header {
+    package org.isu.oberon;
+    // import java.util.HashMap;
+}
+
 expression returns [int value]
     :   mult { int m1 = $mult.value; }
         pm   { int tt=$pm.value; }
