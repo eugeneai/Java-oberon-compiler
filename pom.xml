@@ -7,6 +7,12 @@
     <groupId>oberon</groupId>
     <artifactId>org.isu.oberon</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <properties>
+        <src.dir>src/main/java</src.dir>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -21,6 +27,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.isu.oberon.Main</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
