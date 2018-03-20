@@ -1,6 +1,7 @@
 package org.isu.oberon;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.io.FileInputStream;
@@ -11,22 +12,24 @@ public class Main {
         // Show where we are.
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
-        try {
+        for(String fileName: args) {
+            try {
+                System.out.print(String.format("Processing file: '%s': ", fileName));
+                CharStream input = CharStreams.fromFileName(fileName);
 
-            ANTLRInputStream input = new ANTLRInputStream(
-                    new FileInputStream(args[0]));
+                ExprLexer lexer = new ExprLexer(input);
+                ExprParser parser = new ExprParser(new CommonTokenStream(lexer));
+                // parser.addParseListener(new MyListener());
 
-            ExprLexer lexer = new ExprLexer(input);
-            ExprParser parser = new ExprParser(new CommonTokenStream(lexer));
-            // parser.addParseListener(new MyListener());
-
-
-            // Start parsing
-            parser.expression();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+                // Start parsing
+                parser.expression();
+                System.out.println("[SUCCCESS]");
+            } catch (IOException e) {
+                System.out.println("[FAILURE]");
+                e.printStackTrace();
+            }
         }
+        System.out.flush();
         CompileLLVM.Test();
     }
 }
