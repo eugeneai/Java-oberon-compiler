@@ -9,9 +9,7 @@ import static org.bytedeco.javacpp.LLVM.*;
 }
 
 program returns [EvalStruct s]
-    :   expression {
-            //System.out.println(String.format("Expr = %d",
-            //    $expression.value));
+    :   {
             LLVMModuleRef mod = LLVMModuleCreateWithName("expr_module");
 
             LLVMTypeRef fac_arg = null;
@@ -19,27 +17,32 @@ program returns [EvalStruct s]
             LLVMValueRef expr = LLVMAddFunction(mod, "expr", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(expr, LLVMCCallConv);
 
-            // Generating return value
 
             LLVMBuilderRef builder = LLVMCreateBuilder();
 
-            LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
-            LLVMPositionBuilderAtEnd(builder, end);
+            $s = new EvalStruct(mod, expr, builder);
+        }
+        e=expression[$s] {
+            //System.out.println(String.format("Expr = %d",
+            //    $expression.value));
 
+            // FIXME: Migt be useful for Exceptions and Exits.
+            LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
+            LLVMPositionBuilderAtEnd($s.builder, end);
+
+            // Generating return value
             LLVMValueRef res = LLVMConstInt(LLVMInt64Type(), 42, 0);
             LLVMBuildRet(builder, res);
 
-            $s = new EvalStruct(mod, expr);
-            LLVMDisposeBuilder(builder);
         }
     ;
 
-expression returns [int value]
+expression [EvalStruct s] returns [int value]
     :
-        m=mult { $value = $m.value; }
+        m=mult[$s] { $value = $m.value; }
     (
         op=pm
-        e=expression { $value = ExprEvaluator.interp($value, $op.value, $e.value); }
+        e=expression[$s] { $value = ExprEvaluator.interp($value, $op.value, $e.value); }
     )*
     ;
 
@@ -48,12 +51,12 @@ pm returns [int value]
     |   MINUS { $value = $MINUS.type; }
     ;
 
-mult returns [int value]
+mult [EvalStruct s] returns [int value]
     :
-        t=term { $value = $t.value; }
+        t=term[$s] { $value = $t.value; }
     (
         op=md
-        m=mult { $value = ExprEvaluator.interp($value, $op.value, $m.value); }
+        m=mult[$s] { $value = ExprEvaluator.interp($value, $op.value, $m.value); }
     )*
     ;
 
@@ -62,9 +65,9 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term returns [int value]
-    :   NUMBER               { $value = $NUMBER.int; }
-    |   LPAR expression RPAR { $value = $expression.value; }
+term [EvalStruct s] returns [int value]
+    :   NUMBER                   { $value = $NUMBER.int; }
+    |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
 /* Lexical rules */

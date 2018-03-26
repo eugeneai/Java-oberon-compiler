@@ -65,6 +65,8 @@ public class Main {
 
                 LLVMDisposePassManager(pass);
                 LLVMDisposeExecutionEngine(engine);
+                LLVMDisposeBuilder(s.builder);
+
 
                 System.out.println("\n--------------------------------------");
                 System.out.println("Translation: [SUCCCESS]");
