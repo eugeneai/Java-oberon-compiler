@@ -14,7 +14,7 @@ public class Main {
                 System.getProperty("user.dir"));
         for(String fileName: args) {
             try {
-                System.out.print(String.format("Processing file: '%s': ", fileName));
+                System.out.println(String.format("Processing file: '%s': ", fileName));
                 CharStream input = CharStreams.fromFileName(fileName);
 
                 ExprLexer lexer = new ExprLexer(input);
@@ -23,13 +23,13 @@ public class Main {
 
                 // Start parsing
                 parser.program();
-                System.out.println("[SUCCCESS]");
+                System.out.println("Translation: [SUCCCESS]");
             } catch (IOException e) {
                 System.out.println("[FAILURE]");
                 e.printStackTrace();
             }
         }
         System.out.flush();
-        CompileLLVM.Test();
+        //CompileLLVM.Test();
     }
 }
