@@ -23,6 +23,7 @@ public class Main {
         LLVMInitializeNativeAsmParser();
         LLVMInitializeNativeDisassembler();
         LLVMInitializeNativeTarget();
+
         for(String fileName: args) {
             try {
                 System.out.println(String.format("Processing file: '%s': ", fileName));
@@ -33,11 +34,39 @@ public class Main {
                 // parser.addParseListener(new MyListener());
 
                 // Start parsing
-                LLVMModuleRef mod = parser.program().mod;
-                System.out.println("\n-------------------- dump ------------");
-                LLVMDumpModule(mod);
-                System.out.println("\n--------------------------------------");
+                EvalStruct s = parser.program().s;
+                //LLVMVerifyModule(mod, LLVMAbortProcessAction, error);
+                //LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
 
+                System.out.println("\n-------------------- dump ------------");
+                LLVMDumpModule(s.mod);
+                System.out.println("\n-------------------- exec ------------");
+
+                LLVMExecutionEngineRef engine = new LLVMExecutionEngineRef();
+                if(LLVMCreateJITCompilerForModule(engine, s.mod, 2, error) != 0) {
+                    System.err.println(error.getString());
+                    LLVMDisposeMessage(error);
+                    System.exit(-1);
+                }
+
+                LLVMPassManagerRef pass = LLVMCreatePassManager();
+                LLVMAddConstantPropagationPass(pass);
+                LLVMAddInstructionCombiningPass(pass);
+                LLVMAddPromoteMemoryToRegisterPass(pass);
+                // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory
+                LLVMAddGVNPass(pass);
+                LLVMAddCFGSimplificationPass(pass);
+                LLVMRunPassManager(pass, s.mod);
+                LLVMDumpModule(s.mod);
+
+                LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
+                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.expr, 0, exec_args);
+                System.out.println(" ----> Result: " + LLVMGenericValueToInt(exec_res, 0));
+
+                LLVMDisposePassManager(pass);
+                LLVMDisposeExecutionEngine(engine);
+
+                System.out.println("\n--------------------------------------");
                 System.out.println("Translation: [SUCCCESS]");
             } catch (IOException e) {
                 System.out.println("[FAILURE]");
@@ -45,10 +74,5 @@ public class Main {
             }
         }
         System.out.flush();
-        /*
-        LLVMDisposePassManager(pass);
-        LLVMDisposeBuilder(builder);
-        LLVMDisposeExecutionEngine(engine);
-        */
     }
 }
