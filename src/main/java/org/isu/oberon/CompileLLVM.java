@@ -1,7 +1,6 @@
 package org.isu.oberon;
 
 import org.bytedeco.javacpp.*;
-
 import static org.bytedeco.javacpp.LLVM.*;
 
 public class CompileLLVM {
@@ -14,7 +13,7 @@ public class CompileLLVM {
         LLVMInitializeNativeTarget();
         LLVMModuleRef mod = LLVMModuleCreateWithName("fac_module");
         LLVMTypeRef[] fac_args = { LLVMInt32Type() };
-        LLVMValueRef fac = LLVMAddFunction(mod, "fac", LLVMFunctionType(LLVMInt32Type(), fac_args[0], 1, 0));
+        LLVMValueRef fac = LLVMAddFunction(mod, "fac", LLVMFunctionType(LLVMInt32Type(), fac_args[0], 0, 0));
         LLVMSetFunctionCallConv(fac, LLVMCCallConv);
         LLVMValueRef n = LLVMGetParam(fac, 0);
 

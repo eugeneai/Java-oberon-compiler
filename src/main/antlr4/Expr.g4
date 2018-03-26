@@ -1,14 +1,23 @@
 grammar Expr;
 
 @header {
-    package org.isu.oberon;
-    // import java.util.HashMap;
+package org.isu.oberon;
+
+// import java.util.HashMap;
+import org.bytedeco.javacpp.*;
+import static org.bytedeco.javacpp.LLVM.*;
 }
 
-program returns [int value]
+program returns [LLVMModuleRef mod]
     :   expression {
-           System.out.println(String.format("Expr = %d",
-               $expression.value));
+            //System.out.println(String.format("Expr = %d",
+            //    $expression.value));
+            $mod = LLVMModuleCreateWithName("expr_module");
+
+            LLVMTypeRef fac_arg = null;
+
+            LLVMValueRef expr = LLVMAddFunction($mod, "expr", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMSetFunctionCallConv(expr, LLVMCCallConv);
         }
     ;
 
