@@ -5,6 +5,13 @@ grammar Expr;
     // import java.util.HashMap;
 }
 
+program returns [int value]
+    :   expression {
+           System.out.println(String.format("Expr = %d",
+               $expression.value));
+        }
+    ;
+
 expression returns [int value]
     :   mult { int m1 = $mult.value; }
         pm   { int tt=$pm.value; }

@@ -22,7 +22,7 @@ public class Main {
                 // parser.addParseListener(new MyListener());
 
                 // Start parsing
-                parser.expression();
+                parser.program();
                 System.out.println("[SUCCCESS]");
             } catch (IOException e) {
                 System.out.println("[FAILURE]");
