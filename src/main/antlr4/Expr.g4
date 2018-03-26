@@ -18,6 +18,17 @@ program returns [LLVMModuleRef mod]
 
             LLVMValueRef expr = LLVMAddFunction($mod, "expr", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(expr, LLVMCCallConv);
+
+            // Generating return value
+
+            LLVMBuilderRef builder = LLVMCreateBuilder();
+
+            LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
+            LLVMPositionBuilderAtEnd(builder, end);
+
+            LLVMValueRef res = LLVMConstInt(LLVMInt64Type(), 42, 0);
+            LLVMBuildRet(builder, res);
+
         }
     ;
 
