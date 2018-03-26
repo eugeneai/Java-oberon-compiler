@@ -17,8 +17,8 @@ public class Main {
                 System.out.println(String.format("Processing file: '%s': ", fileName));
                 CharStream input = CharStreams.fromFileName(fileName);
 
-                ExprLexer lexer = new ExprLexer(input);
-                ExprParser parser = new ExprParser(new CommonTokenStream(lexer));
+                org.isu.oberon.ExprLexer lexer = new org.isu.oberon.ExprLexer(input);
+                org.isu.oberon.ExprParser parser = new org.isu.oberon.ExprParser(new CommonTokenStream(lexer));
                 // parser.addParseListener(new MyListener());
 
                 // Start parsing

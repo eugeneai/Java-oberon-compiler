@@ -3,6 +3,12 @@ package org.isu.oberon;
 public class ExprEvaluator {
     public static int interp(int arg1, int op, int arg2)
     {
+        /*
+        System.out.println(
+                String.format("--> Op: %d '%d' %d",
+                        arg1, op, arg2)
+        );
+        */
         switch (op) {
             case org.isu.oberon.ExprParser.PLUS:
                 return arg1 + arg2;

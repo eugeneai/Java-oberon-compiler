@@ -13,9 +13,12 @@ program returns [int value]
     ;
 
 expression returns [int value]
-    :   mult { int m1 = $mult.value; }
-        pm   { int tt=$pm.value; }
-        mult { $value = ExprEvaluator.interp(m1, tt, $mult.value); }
+    :
+        m=mult { $value = $m.value; }
+    (
+        op=pm
+        e=expression { $value = ExprEvaluator.interp($value, $op.value, $e.value); }
+    )*
     ;
 
 pm returns [int value]
@@ -24,9 +27,12 @@ pm returns [int value]
     ;
 
 mult returns [int value]
-    :   term { int t1 = $term.value; }
-        md   { int tt=$md.value; }
-        term { $value = ExprEvaluator.interp(t1, tt, $term.value); }
+    :
+        t=term { $value = $t.value; }
+    (
+        op=md
+        m=mult { $value = ExprEvaluator.interp($value, $op.value, $m.value); }
+    )*
     ;
 
 md returns [int value]
