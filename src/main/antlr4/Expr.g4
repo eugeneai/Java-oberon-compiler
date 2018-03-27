@@ -67,8 +67,8 @@ md returns [int value]
 
 term [EvalStruct s] returns [LLVMValueRef value]
     :   NUMBER {
-             LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
-             LLVMPositionBuilderAtEnd($s.builder, number);
+             // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
+             // LLVMPositionBuilderAtEnd($s.builder, number);
              $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
         }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
