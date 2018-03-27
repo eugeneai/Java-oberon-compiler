@@ -26,7 +26,7 @@ program returns [EvalStruct s]
             //System.out.println(String.format("Expr = %d",
             //    $expression.value));
 
-            // FIXME: Migt be useful for Exceptions and Exits.
+            // FIXME: Might be useful for Exceptions and Exits.
             LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
             LLVMPositionBuilderAtEnd($s.builder, end);
 
