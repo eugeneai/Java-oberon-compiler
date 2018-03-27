@@ -57,7 +57,6 @@ public class Main {
                 LLVMAddGVNPass(pass);
                 LLVMAddCFGSimplificationPass(pass);
                 LLVMRunPassManager(pass, s.mod);
-                LLVMDumpModule(s.mod);
 
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
                 LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.expr, 0, exec_args);

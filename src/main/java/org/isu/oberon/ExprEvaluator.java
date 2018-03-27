@@ -30,5 +30,6 @@ public class ExprEvaluator {
                 System.out.println("Wrong Operation!");
                 System.exit(1);
         }
+        return null; // Should not get here
     }
 }
