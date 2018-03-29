@@ -23,15 +23,11 @@ program returns [EvalStruct s]
             $s = new EvalStruct(mod, expr, builder);
         }
         e=expression[$s] {
-            //System.out.println(String.format("Expr = %d",
-            //    $expression.value));
 
-            // FIXME: Migt be useful for Exceptions and Exits.
+            // FIXME: Block "end" migt be useful for Exceptions and Exits.
             LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
             LLVMPositionBuilderAtEnd($s.builder, end);
 
-            // Generating return value
-            //LLVMValueRef res = LLVMConstInt(LLVMInt64Type(), 42, 0);
             LLVMBuildRet(builder, $e.value);
 
         }
