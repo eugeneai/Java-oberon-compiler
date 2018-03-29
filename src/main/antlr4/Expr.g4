@@ -23,26 +23,22 @@ program returns [EvalStruct s]
             $s = new EvalStruct(mod, expr, builder);
         }
         e=expression[$s] {
-            //System.out.println(String.format("Expr = %d",
-            //    $expression.value));
 
-            // FIXME: Might be useful for Exceptions and Exits.
+            // FIXME: Block "end" migt be useful for Exceptions and Exits.
             LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
             LLVMPositionBuilderAtEnd($s.builder, end);
 
-            // Generating return value
-            LLVMValueRef res = LLVMConstInt(LLVMInt64Type(), 42, 0);
-            LLVMBuildRet(builder, res);
+            LLVMBuildRet(builder, $e.value);
 
         }
     ;
 
-expression [EvalStruct s] returns [int value]
+expression [EvalStruct s] returns [LLVMValueRef value]
     :
         m=mult[$s] { $value = $m.value; }
     (
         op=pm
-        e=expression[$s] { $value = ExprEvaluator.interp($value, $op.value, $e.value); }
+        e=expression[$s] { $value = ExprEvaluator.interp($s, $value, $op.value, $e.value); }
     )*
     ;
 
@@ -51,12 +47,12 @@ pm returns [int value]
     |   MINUS { $value = $MINUS.type; }
     ;
 
-mult [EvalStruct s] returns [int value]
+mult [EvalStruct s] returns [LLVMValueRef value]
     :
         t=term[$s] { $value = $t.value; }
     (
         op=md
-        m=mult[$s] { $value = ExprEvaluator.interp($value, $op.value, $m.value); }
+        m=mult[$s] { $value = ExprEvaluator.interp($s, $value, $op.value, $m.value); }
     )*
     ;
 
@@ -65,8 +61,12 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [EvalStruct s] returns [int value]
-    :   NUMBER                   { $value = $NUMBER.int; }
+term [EvalStruct s] returns [LLVMValueRef value]
+    :   NUMBER {
+             // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
+             // LLVMPositionBuilderAtEnd($s.builder, number);
+             $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
+        }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 

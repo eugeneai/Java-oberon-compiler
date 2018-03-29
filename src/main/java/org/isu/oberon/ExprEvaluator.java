@@ -1,7 +1,11 @@
 package org.isu.oberon;
 
+import org.bytedeco.javacpp.LLVM.*;
+
+import static org.bytedeco.javacpp.LLVM.*;
+
 public class ExprEvaluator {
-    public static int interp(int arg1, int op, int arg2)
+    public static LLVMValueRef interp(EvalStruct s, LLVMValueRef arg1, int op, LLVMValueRef arg2)
     {
         /*
         System.out.println(
@@ -11,20 +15,21 @@ public class ExprEvaluator {
         */
         switch (op) {
             case org.isu.oberon.ExprParser.PLUS:
-                return arg1 + arg2;
+                return LLVMBuildAdd(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.MINUS:
-                return arg1 - arg2;
+                return LLVMBuildSub(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.MUL:
-                return arg1 * arg2;
+                return LLVMBuildMul(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.DIV:
-                return arg1 / arg2;
+                return LLVMBuildSDiv(s.builder, arg1, arg2, "");
 
             default:
                 System.out.println("Wrong Operation!");
-                return 0;
+                System.exit(1);
         }
+        return null; // Should not get here
     }
 }
