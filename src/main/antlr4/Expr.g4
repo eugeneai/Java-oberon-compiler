@@ -38,7 +38,7 @@ expression [EvalStruct s] returns [LLVMValueRef value]
         m=mult[$s] { $value = $m.value; }
     (
         op=pm
-        e=expression[$s] { $value = ExprEvaluator.interp($s, $value, $op.value, $e.value); }
+        e=expression[$s] { $value = $s.interp($value, $op.value, $e.value); }
     )*
     ;
 
@@ -52,7 +52,7 @@ mult [EvalStruct s] returns [LLVMValueRef value]
         t=term[$s] { $value = $t.value; }
     (
         op=md
-        m=mult[$s] { $value = ExprEvaluator.interp($s, $value, $op.value, $m.value); }
+        m=mult[$s] { $value = $s.interp($value, $op.value, $m.value); }
     )*
     ;
 
