@@ -14,7 +14,7 @@ program returns [EvalStruct s]
 
             LLVMTypeRef fac_arg = null;
 
-            LLVMValueRef expr = LLVMAddFunction(mod, "expr", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMValueRef expr = LLVMAddFunction(mod, "expr", LLVMFunctionType(LLVMDoubleType(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(expr, LLVMCCallConv);
 
 
@@ -62,14 +62,31 @@ md returns [int value]
     ;
 
 term [EvalStruct s] returns [LLVMValueRef value]
-    :   NUMBER {
-             // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
-             // LLVMPositionBuilderAtEnd($s.builder, number);
-             $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
+    :   i=INTNUMBER {
+             // $value = LLVMConstIntOfString(LLVMInt64Type(), $i.text, (byte) 10);
+             $value = LLVMConstRealOfString(LLVMDoubleType(), $i.text);
         }
+    |   f=floatnumber {
+             $value = LLVMConstRealOfString(LLVMDoubleType(), $f.text);
+        }
+
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
+floatnumber returns [String value] locals [String number]
+    :   i=INTNUMBER
+        {    $number = $i.text;  }
+        DOT
+        (
+         j=INTNUMBER
+         {   $number += "."+$j.text; }
+        )?
+        (
+         e=ENUMBER
+         {   $number += $e.text; }
+        )?
+        {    $value = $number;  }
+    ;
 /* Lexical rules */
 
 PLUS : '+' ;
@@ -78,7 +95,10 @@ DIV  : '/' ;
 MUL  : '*' ;
 LPAR : '(' ;
 RPAR : ')' ;
+DOT  : '.' ;
+EXP  : [eE];
 
-NUMBER  : '-'?[0-9]+(.[0-9]([eE][0-9])?)? ;
+INTNUMBER    : '-'?[0-9]+;
+ENUMBER      : [eE]'-'?[0-9]+;
 
 WS : [ \r\t\u000C\n]+ -> skip ;

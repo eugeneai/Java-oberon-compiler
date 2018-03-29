@@ -60,7 +60,7 @@ public class Main {
 
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
                 LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.expr, 0, exec_args);
-                System.out.println(" ----> Result: " + LLVMGenericValueToInt(exec_res, 0));
+                System.out.println(" ----> Result: " + LLVMGenericValueToFloat(LLVMDoubleType(), exec_res));
 
                 LLVMDisposePassManager(pass);
                 LLVMDisposeExecutionEngine(engine);

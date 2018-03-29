@@ -15,16 +15,16 @@ public class ExprEvaluator {
         */
         switch (op) {
             case org.isu.oberon.ExprParser.PLUS:
-                return LLVMBuildAdd(s.builder, arg1, arg2, "");
+                return LLVMBuildFAdd(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.MINUS:
-                return LLVMBuildSub(s.builder, arg1, arg2, "");
+                return LLVMBuildFSub(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.MUL:
-                return LLVMBuildMul(s.builder, arg1, arg2, "");
+                return LLVMBuildFMul(s.builder, arg1, arg2, "");
 
             case org.isu.oberon.ExprParser.DIV:
-                return LLVMBuildSDiv(s.builder, arg1, arg2, "");
+                return LLVMBuildFDiv(s.builder, arg1, arg2, "");
 
             default:
                 System.out.println("Wrong Operation!");
