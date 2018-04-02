@@ -1,6 +1,10 @@
 # Java-oberon-compiler
 Compiler for Oberon programming language implemented with Java, Antlr4, LLVM. A project showing students that writing compilers is fun.
 
+## Реализуемая спецификация
+
+https://www.inf.ethz.ch/personal/wirth/Oberon/Oberon07.Report.pdf
+
 ## Установка программного обеспечения
 
 ## Клонирование данного проекта
