@@ -1,7 +1,11 @@
 package org.isu.oberon;
 
+import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.LLVM.*;
+
+import java.util.HashMap;
+
 import static org.bytedeco.javacpp.LLVM.*;
 
 
@@ -11,8 +15,10 @@ public class EvalStruct {
     public LLVMModuleRef mod;
     public LLVMValueRef main;
     public LLVMBuilderRef builder;
+    public final HashMap<String, LLVMValueRef> symTable;
 
     EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
+        this.symTable = new HashMap<>();
         this.parser=parser;
         this.mod=mod;
         this.main=main;
@@ -39,6 +45,19 @@ public class EvalStruct {
                 System.exit(1);
         }
         return null; // Should not get here
+    }
+
+    public void addExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
+        if (symTable.containsKey(name)) {
+            throw new FailedPredicateException(parser,
+                    "symbol-exists-already",
+                    String.format("The '%s' identifier is already defined", name));
+        }
+        symTable.put(name,expr);
+    }
+
+    public LLVMValueRef getRef(String name) {
+        return symTable.get(name);
     }
 
 }

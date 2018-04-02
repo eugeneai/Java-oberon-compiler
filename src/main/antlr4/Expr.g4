@@ -10,15 +10,7 @@ import static org.bytedeco.javacpp.LLVM.*;
 
 /*  MODULE ident ";" [ImportList] DeclarationSequence
       [BEGIN StatementSequence] END ident "." .
-        e=expression[$s] {
 
-            // FIXME: Block "end" migt be useful for Exceptions and Exits.
-            LLVMBasicBlockRef end = LLVMAppendBasicBlock(expr, "end");
-            LLVMPositionBuilderAtEnd($s.builder, end);
-
-            LLVMBuildRet(builder, $e.value);
-
-        }
 
       */
 
@@ -31,7 +23,7 @@ module [ExprParser parser] returns [EvalStruct s]
 
             LLVMTypeRef fac_arg = null;
 
-            LLVMValueRef main = LLVMAddFunction(mod, "main", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMValueRef main = LLVMAddFunction(mod, "@MODULEBLOCK@", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(main, LLVMCCallConv);
 
 
@@ -78,10 +70,23 @@ statement [EvalStruct s]:
 
 assignment [EvalStruct s]:
    id=IDENT ASSIGN e=expression [$s]
+   {
+        LLVMSetValueName($e.value, $id.text);
+        $s.addExpr($id.text, $e.value);
+   }
    ;
 
-returnOp [EvalStruct s]:
+returnOp [EvalStruct s] returns [LLVMValueRef value]:
    RETURN e=expression [$s]
+   {
+       // FIXME: Block "end" migt be useful for Exceptions and Exits.
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.main, "end");
+       LLVMPositionBuilderAtEnd($s.builder, end);
+
+       LLVMBuildRet($s.builder, $e.value);
+
+       $value = $e.value;
+   }
    ;
 
 expression [EvalStruct s] returns [LLVMValueRef value]
@@ -118,7 +123,10 @@ term [EvalStruct s] returns [LLVMValueRef value]
              // LLVMPositionBuilderAtEnd($s.builder, number);
              $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
         }
-    |   IDENT
+    |   id=IDENT
+        {
+             $value = $s.getRef($id.text);
+        }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
