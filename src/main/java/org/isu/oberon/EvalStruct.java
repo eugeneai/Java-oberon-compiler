@@ -7,13 +7,15 @@ import static org.bytedeco.javacpp.LLVM.*;
 
 public class EvalStruct {
 
+    org.isu.oberon.ExprParser parser;
     public LLVMModuleRef mod;
-    public LLVMValueRef expr;
+    public LLVMValueRef main;
     public LLVMBuilderRef builder;
 
-    EvalStruct(LLVMModuleRef mod, LLVMValueRef expr, LLVMBuilderRef builder) {
+    EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
+        this.parser=parser;
         this.mod=mod;
-        this.expr=expr;
+        this.main=main;
         this.builder=builder;
     }
 

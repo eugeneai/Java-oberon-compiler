@@ -8,20 +8,8 @@ import org.bytedeco.javacpp.*;
 import static org.bytedeco.javacpp.LLVM.*;
 }
 
-program returns [EvalStruct s]
-    :   {
-            LLVMModuleRef mod = LLVMModuleCreateWithName("expr_module");
-
-            LLVMTypeRef fac_arg = null;
-
-            LLVMValueRef expr = LLVMAddFunction(mod, "expr", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
-            LLVMSetFunctionCallConv(expr, LLVMCCallConv);
-
-
-            LLVMBuilderRef builder = LLVMCreateBuilder();
-
-            $s = new EvalStruct(mod, expr, builder);
-        }
+/*  MODULE ident ";" [ImportList] DeclarationSequence
+      [BEGIN StatementSequence] END ident "." .
         e=expression[$s] {
 
             // FIXME: Block "end" migt be useful for Exceptions and Exits.
@@ -31,7 +19,70 @@ program returns [EvalStruct s]
             LLVMBuildRet(builder, $e.value);
 
         }
+
+      */
+
+module [ExprParser parser] returns [EvalStruct s]
+    :
+        MODULE mid=IDENT SEMI
+        /* importlist */
+        {
+            LLVMModuleRef mod = LLVMModuleCreateWithName($mid.text);
+
+            LLVMTypeRef fac_arg = null;
+
+            LLVMValueRef main = LLVMAddFunction(mod, "main", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMSetFunctionCallConv(main, LLVMCCallConv);
+
+
+            LLVMBuilderRef builder = LLVMCreateBuilder();
+
+            $s = new EvalStruct($parser, mod, main, builder);
+        }
+        declarationSequence [$s]
+        (
+         BEGIN
+         statementSequence [$s]
+         ) ?
+        END eid=IDENT
+        {
+            if ($mid.text != $eid.text) {
+                throw new FailedPredicateException($s.parser,
+                    "head-tail-module-name-mismatch",
+                    "Tail and head module names must be equal");
+            }
+        }
+        DOT
     ;
+
+declarationSequence [EvalStruct s]:
+    ( VAR (variableDeclaration [$s] SEMI ) * ) ?
+;
+
+variableDeclaration [EvalStruct s]:
+   IDENT (COMMA IDENT)* COLON IDENT
+   ;
+
+statementSequence  [EvalStruct s]:
+   statement [$s]
+   (
+      SEMI
+      statement [$s]
+   ) *
+;
+
+statement [EvalStruct s]:
+     assignment [$s]
+   | returnOp [$s]
+;
+
+assignment [EvalStruct s]:
+   id=IDENT ASSIGN e=expression [$s]
+   ;
+
+returnOp [EvalStruct s]:
+   RETURN e=expression [$s]
+   ;
 
 expression [EvalStruct s] returns [LLVMValueRef value]
     :
@@ -67,6 +118,7 @@ term [EvalStruct s] returns [LLVMValueRef value]
              // LLVMPositionBuilderAtEnd($s.builder, number);
              $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
         }
+    |   IDENT
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
@@ -78,7 +130,20 @@ DIV  : '/' ;
 MUL  : '*' ;
 LPAR : '(' ;
 RPAR : ')' ;
+DOT  : '.' ;
+SEMI : ';' ;
+COLON: ':' ;
+COMMA: ',' ;
+
+ASSIGN: ':=';
+
+BEGIN : 'BEGIN' ;
+END   : 'END'   ;
+MODULE: 'MODULE';
+VAR   : 'VAR'   ;
+RETURN: 'RETURN';
 
 NUMBER  : '-'?[0-9]+ ;
+IDENT   : [_a-zA-Z][_a-zA-Z0-9]* ;
 
 WS : [ \r\t\u000C\n]+ -> skip ;
