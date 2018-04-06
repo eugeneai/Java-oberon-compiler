@@ -48,7 +48,7 @@ module [ExprParser parser] returns [EvalStruct s]
     ;
 
 declarationSequence [EvalStruct s]:
-    ( VAR (variableDeclaration [$s] SEMI ) * ) ?
+    ( VAR (variableDeclaration [$s] SEMI ) + ) ?
 ;
 
 variableDeclaration [EvalStruct s]:
