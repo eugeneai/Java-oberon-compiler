@@ -1,7 +1,6 @@
 package org.isu.oberon;
 
 import org.antlr.v4.runtime.FailedPredicateException;
-import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.LLVM.*;
 
 import java.util.HashMap;
@@ -11,11 +10,11 @@ import static org.bytedeco.javacpp.LLVM.*;
 
 public class EvalStruct {
 
-    org.isu.oberon.ExprParser parser;
-    public LLVMModuleRef mod;
-    public LLVMValueRef main;
-    public LLVMBuilderRef builder;
-    public final HashMap<String, LLVMValueRef> symTable;
+    public final org.isu.oberon.ExprParser parser;
+    final LLVMModuleRef mod;
+    public final LLVMValueRef main;
+    public final LLVMBuilderRef builder;
+    private final HashMap<String, LLVMValueRef> symTable;
 
     EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
         this.symTable = new HashMap<>();
