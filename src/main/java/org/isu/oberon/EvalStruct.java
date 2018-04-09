@@ -96,6 +96,8 @@ public class EvalStruct {
     }
 
     private Symbol addSymbol(Symbol sym){
+        System.out.println(String.format("Added symbol: '%s':'%s'",
+                sym.name, sym.getClass().getName()));
         return getCurrent().put(sym.name, sym);
     }
 
