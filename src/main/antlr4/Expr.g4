@@ -4,6 +4,7 @@ grammar Expr;
 package org.isu.oberon;
 
 // import java.util.HashMap;
+import java.util.Vector;
 import org.bytedeco.javacpp.*;
 import static org.bytedeco.javacpp.LLVM.*;
 }
@@ -30,6 +31,9 @@ module [ExprParser parser] returns [EvalStruct s]
             LLVMBuilderRef builder = LLVMCreateBuilder();
 
             $s = new EvalStruct($parser, mod, main, builder);
+
+            $s.createSymbolTable();
+            $s.addModule($mid.text);
         }
         declarationSequence [$s]
         (
@@ -45,14 +49,44 @@ module [ExprParser parser] returns [EvalStruct s]
             }
         }
         DOT
+        {
+            $s.removeSymbolTable();
+        }
     ;
 
 declarationSequence [EvalStruct s]:
     ( VAR (variableDeclaration [$s] SEMI ) + ) ?
 ;
 
-variableDeclaration [EvalStruct s]:
-   IDENT (COMMA IDENT)* COLON IDENT
+variableDeclaration [EvalStruct s] locals [Vector<String> vars]:
+   id=IDENT
+        {
+            $vars = new Vector<String>();
+            $vars.add($id.text);
+            $s.IdDoesNotExist($id.text);
+        }
+   (
+   COMMA
+   id=IDENT
+        {
+            if ($vars.contains($id.text)) {
+                throw new FailedPredicateException($s.parser,
+                              "repeated-identifier",
+                              String.format("Identifier '%s' already listed", $id.text));
+
+            };
+
+            $vars.add($id.text);
+            $s.IdDoesNotExist($id.text);
+        }
+   )*
+   COLON
+   ty=IDENT
+        {
+            for (String var: $vars) {
+                $s.addVariable(var, $ty.text);
+            };
+        }
    ;
 
 statementSequence  [EvalStruct s]:
@@ -72,7 +106,7 @@ assignment [EvalStruct s]:
    id=IDENT ASSIGN e=expression [$s]
    {
         LLVMSetValueName($e.value, $id.text);
-        $s.addExpr($id.text, $e.value);
+        $s.setExpr($id.text, $e.value);
    }
    ;
 
