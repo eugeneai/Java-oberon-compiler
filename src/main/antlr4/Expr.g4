@@ -157,13 +157,19 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [EvalStruct s] returns [ArithValue value]
+term [EvalStruct s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type]
     :   NUMBER {
-             // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
-             // LLVMPositionBuilderAtEnd($s.builder, number);
-
-             LLVMValueRef ref = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
-             $value = new ArithValue((IntegerType) $s.getType("INTEGER"), ref);
+             $type = (FloatType) $s.getType("INTEGER");
+             $ref = LLVMConstIntOfString(LLVMInt64Type(),
+                                         $NUMBER.text,
+                                         (byte) 10);
+             $value = new ArithValue($type, $ref);
+        }
+    |   FLOAT {
+             $type = (IntegerType) $s.getType("FLOAT");
+             $ref = LLVMConstRealOfString(LLVMFloatType(),
+                                          $FLOAT.text); // FIXME: chack ref on null
+             $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
         {
@@ -194,6 +200,7 @@ VAR   : 'VAR'   ;
 RETURN: 'RETURN';
 
 NUMBER  : '-'?[0-9]+ ;
+FLOAT   : '-'?[0-9]*[.]([eE][0-9]+)? ;
 IDENT   : [_a-zA-Z][_a-zA-Z0-9]* ;
 
 WS : [ \r\t\u000C\n]+ -> skip ;

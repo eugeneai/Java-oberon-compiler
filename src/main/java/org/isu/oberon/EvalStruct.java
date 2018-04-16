@@ -101,6 +101,7 @@ public class EvalStruct {
         tables = new SymbolTables(types);
 
         addSymbol(new IntegerType());
+        addSymbol(new FloatType());
         // FIXME: add other basic types: REAL, FLOAT, CARDINAL, STRING, CHAR
     }
 
