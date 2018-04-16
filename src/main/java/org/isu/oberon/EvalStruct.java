@@ -11,9 +11,9 @@ public class EvalStruct {
 
     public final org.isu.oberon.ExprParser parser;
     final LLVMModuleRef mod;
-    public final LLVMValueRef main;
+    public final LLVMValueRef main; // FIXME: rename main as function.
     public final LLVMBuilderRef builder;
-    SymbolTables tables = null;
+    SymbolTables tables = null; // FIXME: It must be only the current hashtable.
 
     EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
         this.parser=parser;
@@ -24,36 +24,16 @@ public class EvalStruct {
         initializeTypeTable();
     }
 
-    public LLVMValueRef interp(LLVMValueRef arg1, int op, LLVMValueRef arg2)
-    {
-        switch (op) {
-            case org.isu.oberon.ExprParser.PLUS:
-                return LLVMBuildAdd(builder, arg1, arg2, "");
-
-            case org.isu.oberon.ExprParser.MINUS:
-                return LLVMBuildSub(builder, arg1, arg2, "");
-
-            case org.isu.oberon.ExprParser.MUL:
-                return LLVMBuildMul(builder, arg1, arg2, "");
-
-            case org.isu.oberon.ExprParser.DIV:
-                return LLVMBuildSDiv(builder, arg1, arg2, "");
-
-            default:
-                System.out.println("Wrong Operation!");
-                System.exit(1);
-        }
-        return null; // Should not get here
-    }
-
     public void setExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
         IdExists(name);
         VarSymbol var = (VarSymbol) getCurrent().get(name);
         var.ref = expr;
     }
 
-    public LLVMValueRef getRef(String name) {
-        return ((VarSymbol) getCurrent().get(name)).ref;
+    public ArithValue getRef(String name) {
+        VarSymbol var = (VarSymbol) getCurrent().get(name);
+        ArithValue val = new ArithValue((NumberType) var.type, var.ref);
+        return val;
     }
 
     public boolean IdDoesNotExist(String name) throws FailedPredicateException {
@@ -81,7 +61,14 @@ public class EvalStruct {
 
     public TypeSymbol getType(String name) throws SymbolTypeException{
         Symbol sym = tables.get(name);
-        if (sym.isType()) {
+        if (sym == null) {
+            throw new SymbolTypeException(parser,
+                    "type-not-found",
+                    String.format("Symbol '%s' not found (expected to be a type).",
+                            name));
+        }
+
+        if(sym.isType()) {
             return (TypeSymbol) sym;
         } else {
             throw new SymbolTypeException(parser,
@@ -119,5 +106,11 @@ public class EvalStruct {
 
     private HashMap<String,Symbol> getCurrent() {
         return tables.getCurrent();
+    }
+
+    public NumberType infixTypeCast(ArithValue op1, ArithValue op2) {
+        NumberType t1 = op1.type;
+        NumberType t2 = op2.type;
+        return t1; // FIXME: implement implicit casting.
     }
 }

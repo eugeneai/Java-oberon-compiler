@@ -105,30 +105,32 @@ statement [EvalStruct s]:
 assignment [EvalStruct s]:
    id=IDENT ASSIGN e=expression [$s]
    {
-        LLVMSetValueName($e.value, $id.text);
-        $s.setExpr($id.text, $e.value);
+        LLVMSetValueName($e.value.ref, $id.text);
+        $s.setExpr($id.text, $e.value.ref);
    }
    ;
 
-returnOp [EvalStruct s] returns [LLVMValueRef value]:
+returnOp [EvalStruct s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
        LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.main, "end");
        LLVMPositionBuilderAtEnd($s.builder, end);
 
-       LLVMBuildRet($s.builder, $e.value);
-
-       $value = $e.value;
+       LLVMBuildRet($s.builder, $e.value.ref);
    }
    ;
 
-expression [EvalStruct s] returns [LLVMValueRef value]
+expression [EvalStruct s] returns [ArithValue value]
     :
         m=mult[$s] { $value = $m.value; }
     (
         op=pm
-        e=expression[$s] { $value = $s.interp($value, $op.value, $e.value); }
+        e=expression[$s]
+           {
+                NumberType type = $s.infixTypeCast($value, $e.value); // FIXME: returns typecast;
+                $value = type.infixOp($s, $value, $op.value, $e.value);
+           }
     )*
     ;
 
@@ -137,12 +139,16 @@ pm returns [int value]
     |   MINUS { $value = $MINUS.type; }
     ;
 
-mult [EvalStruct s] returns [LLVMValueRef value]
+mult [EvalStruct s] returns [ArithValue value]
     :
         t=term[$s] { $value = $t.value; }
     (
         op=md
-        m=mult[$s] { $value = $s.interp($value, $op.value, $m.value); }
+        m=mult[$s]
+           {
+                NumberType type = $s.infixTypeCast($value, $m.value); // FIXME: returns typecast;
+                $value = type.infixOp($s, $value, $op.value, $m.value);
+           }
     )*
     ;
 
@@ -151,11 +157,13 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [EvalStruct s] returns [LLVMValueRef value]
+term [EvalStruct s] returns [ArithValue value]
     :   NUMBER {
              // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
              // LLVMPositionBuilderAtEnd($s.builder, number);
-             $value = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
+
+             LLVMValueRef ref = LLVMConstInt(LLVMInt64Type(), $NUMBER.int, 0);
+             $value = new ArithValue((IntegerType) $s.getType("INTEGER"), ref);
         }
     |   id=IDENT
         {

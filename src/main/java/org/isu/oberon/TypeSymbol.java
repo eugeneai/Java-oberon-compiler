@@ -17,4 +17,6 @@ public class TypeSymbol extends Symbol {
     public boolean isType() {
         return true;
     }
+
+
 }

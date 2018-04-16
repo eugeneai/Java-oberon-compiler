@@ -2,9 +2,10 @@ package org.isu.oberon;
 
 import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
-public class SymbolTables {
+public class SymbolTables implements Iterable<HashMap<String,Symbol>> {
     private HashMap<String,Symbol> current; // Cache
     private Stack<HashMap<String,Symbol>> stack;
     private HashMap<String,Symbol> typeTable;
@@ -39,14 +40,31 @@ public class SymbolTables {
         return  push(new HashMap<String, Symbol>());
     }
 
-    public Symbol get(String name){
+    public Symbol get(String name) {
+        /*
         if (current.containsKey(name)) {
             return current.get(name);
         };
         return typeTable.get(name);
+        */
+        for (HashMap<String,Symbol> hash : this) {
+            if (hash.containsKey(name)) {
+                return hash.get(name);
+            }
+        }
+        return null;
     }
 
     public HashMap<String,Symbol> getCurrent(){
         return current;
+    }
+
+    @Override
+    public Iterator<HashMap<String, Symbol>> iterator() {
+        return new SymbolTablesIterator(this);
+    }
+
+    public Stack<HashMap<String,Symbol>> getStack() {
+        return stack;
     }
 }
