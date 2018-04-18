@@ -32,7 +32,6 @@ module [OberonParser parser] returns [Context s]
 
             $s = new Context($parser, mod, main, builder);
 
-            $s.createSymbolTable();
             $s.addModule($mid.text);
         }
         declarationSequence [$s]
@@ -49,9 +48,6 @@ module [OberonParser parser] returns [Context s]
             }
         }
         DOT
-        {
-            $s.removeSymbolTable();
-        }
     ;
 
 declarationSequence [Context s]:

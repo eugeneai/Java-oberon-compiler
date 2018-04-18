@@ -15,6 +15,7 @@ public class Main {
         // Show where we are.
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
+        Context.initializeTypeTable();
         BytePointer error = new BytePointer((Pointer)null); // Used to retrieve messages from functions
         LLVMLinkInMCJIT();
         LLVMInitializeNativeAsmPrinter();
