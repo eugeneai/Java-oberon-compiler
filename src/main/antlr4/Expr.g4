@@ -36,11 +36,8 @@ module [ExprParser parser] returns [EvalStruct s]
             $s.addModule($mid.text);
         }
         declarationSequence [$s]
-        (
-         BEGIN
-         statementSequence [$s]
-         ) ?
-        END eid=IDENT
+        block [$s]
+        eid=IDENT
         {
             if ($mid.text != $eid.text) {
                 throw new FailedPredicateException($s.parser,
@@ -52,6 +49,14 @@ module [ExprParser parser] returns [EvalStruct s]
         {
             $s.removeSymbolTable();
         }
+    ;
+
+block [EvalStruct s]:
+    (
+     BEGIN
+     statementSequence [$s]
+    ) ?
+    END
     ;
 
 declarationSequence [EvalStruct s]:
@@ -158,17 +163,17 @@ md returns [int value]
     ;
 
 term [EvalStruct s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type]
-    :   NUMBER {
-             $type = (FloatType) $s.getType("INTEGER");
+    : FLOAT {
+                   $type = (FloatType) $s.getType("FLOAT");
+                   $ref = LLVMConstRealOfString(LLVMFloatType(),
+                                                $FLOAT.text); // FIXME: chack ref on null
+                   $value = new ArithValue($type, $ref);
+            }
+    | NUMBER {
+             $type = (IntegerType) $s.getType("INTEGER");
              $ref = LLVMConstIntOfString(LLVMInt64Type(),
                                          $NUMBER.text,
                                          (byte) 10);
-             $value = new ArithValue($type, $ref);
-        }
-    |   FLOAT {
-             $type = (IntegerType) $s.getType("FLOAT");
-             $ref = LLVMConstRealOfString(LLVMFloatType(),
-                                          $FLOAT.text); // FIXME: chack ref on null
              $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
@@ -179,6 +184,15 @@ term [EvalStruct s] returns [ArithValue value] locals [LLVMValueRef ref, NumberT
     ;
 
 /* Lexical rules */
+
+BEGIN : 'BEGIN' ;
+END   : 'END'   ;
+MODULE: 'MODULE';
+VAR   : 'VAR'   ;
+RETURN: 'RETURN';
+
+FLOAT   : '-'?[0-9]*[.]([eE][0-9]+)? ;
+NUMBER  : '-'?[0-9]+ ;
 
 PLUS : '+' ;
 MINUS: '-' ;
@@ -193,14 +207,6 @@ COMMA: ',' ;
 
 ASSIGN: ':=';
 
-BEGIN : 'BEGIN' ;
-END   : 'END'   ;
-MODULE: 'MODULE';
-VAR   : 'VAR'   ;
-RETURN: 'RETURN';
-
-NUMBER  : '-'?[0-9]+ ;
-FLOAT   : '-'?[0-9]*[.]([eE][0-9]+)? ;
 IDENT   : [_a-zA-Z][_a-zA-Z0-9]* ;
 
 WS : [ \r\t\u000C\n]+ -> skip ;

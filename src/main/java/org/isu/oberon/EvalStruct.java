@@ -47,6 +47,7 @@ public class EvalStruct {
 
     public boolean IdExists(String name) throws FailedPredicateException {
         if (! getCurrent().containsKey(name)) {
+            System.out.println(String.format("FATAL: Identifier '%s' was not defined", name));
             throw new FailedPredicateException(parser,
                     "symbol-does-not-exist",
                     String.format("The '%s' identifier was not defined", name));
