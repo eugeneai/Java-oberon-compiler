@@ -11,14 +11,14 @@ public class Context {
 
     public final org.isu.oberon.OberonParser parser;
     final LLVMModuleRef mod;
-    public final LLVMValueRef main; // FIXME: rename main as function.
+    public final LLVMValueRef func;
     public final LLVMBuilderRef builder;
     SymbolTables tables = null; // FIXME: It must be only the current hashtable.
 
-    Context(org.isu.oberon.OberonParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
+    Context(org.isu.oberon.OberonParser parser, LLVMModuleRef mod, LLVMValueRef func, LLVMBuilderRef builder) {
         this.parser=parser;
         this.mod=mod;
-        this.main=main;
+        this.func=func;
         this.builder=builder;
 
         initializeTypeTable();

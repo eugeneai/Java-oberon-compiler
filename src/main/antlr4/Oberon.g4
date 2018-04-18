@@ -24,7 +24,7 @@ module [OberonParser parser] returns [Context s]
 
             LLVMTypeRef fac_arg = null;
 
-            LLVMValueRef main = LLVMAddFunction(mod, $mid.text, LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMValueRef main = LLVMAddFunction(mod, $mid.text+"@module", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(main, LLVMCCallConv);
 
 
@@ -114,7 +114,7 @@ returnOp [Context s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.main, "end");
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
        LLVMPositionBuilderAtEnd($s.builder, end);
 
        LLVMBuildRet($s.builder, $e.value.ref);

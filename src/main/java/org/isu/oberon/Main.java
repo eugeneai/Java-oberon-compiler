@@ -57,7 +57,7 @@ public class Main {
                 LLVMRunPassManager(pass, s.mod);
 
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
-                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.main, 0, exec_args);
+                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.func, 0, exec_args);
                 System.out.println(" ----> Result: " + LLVMGenericValueToInt(exec_res, 0));
 
                 LLVMDisposePassManager(pass);
