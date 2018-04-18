@@ -1,5 +1,4 @@
 package org.isu.oberon;
-import org.bytedeco.javacpp.LLVM;
 import org.bytedeco.javacpp.LLVM.*;
 import static org.bytedeco.javacpp.LLVM.*;
 
@@ -8,20 +7,20 @@ public class IntegerType extends NumberType {
         super("INTEGER");
     }
 
-    public ArithValue infixOp(EvalStruct s, ArithValue arg1, int op, ArithValue arg2)
+    public ArithValue infixOp(Context s, ArithValue arg1, int op, ArithValue arg2)
     {
         LLVMValueRef res;
         switch (op) {
-            case org.isu.oberon.ExprParser.PLUS:
+            case org.isu.oberon.OberonParser.PLUS:
                 res = LLVMBuildAdd(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.MINUS:
+            case org.isu.oberon.OberonParser.MINUS:
                 res = LLVMBuildSub(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.MUL:
+            case org.isu.oberon.OberonParser.MUL:
                 res =  LLVMBuildMul(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.DIV:
+            case org.isu.oberon.OberonParser.DIV:
                 res = LLVMBuildSDiv(s.builder, arg1.ref, arg2.ref, ""); // FIXME: Signed op.
                 break;
             default:

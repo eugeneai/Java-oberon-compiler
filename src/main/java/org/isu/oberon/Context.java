@@ -7,15 +7,15 @@ import org.bytedeco.javacpp.LLVM.*;
 import static org.bytedeco.javacpp.LLVM.*;
 
 
-public class EvalStruct {
+public class Context {
 
-    public final org.isu.oberon.ExprParser parser;
+    public final org.isu.oberon.OberonParser parser;
     final LLVMModuleRef mod;
     public final LLVMValueRef main; // FIXME: rename main as function.
     public final LLVMBuilderRef builder;
     SymbolTables tables = null; // FIXME: It must be only the current hashtable.
 
-    EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
+    Context(org.isu.oberon.OberonParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
         this.parser=parser;
         this.mod=mod;
         this.main=main;

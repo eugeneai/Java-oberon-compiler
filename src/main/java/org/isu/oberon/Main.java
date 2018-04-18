@@ -6,10 +6,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.bytedeco.javacpp.*;
 import static org.bytedeco.javacpp.LLVM.*;
 
 public class Main {
@@ -29,12 +27,12 @@ public class Main {
                 System.out.println(String.format("Processing file: '%s': ", fileName));
                 CharStream input = CharStreams.fromFileName(fileName);
 
-                org.isu.oberon.ExprLexer lexer = new org.isu.oberon.ExprLexer(input);
-                org.isu.oberon.ExprParser parser = new org.isu.oberon.ExprParser(new CommonTokenStream(lexer));
+                org.isu.oberon.OberonLexer lexer = new org.isu.oberon.OberonLexer(input);
+                org.isu.oberon.OberonParser parser = new org.isu.oberon.OberonParser(new CommonTokenStream(lexer));
                 // parser.addParseListener(new MyListener());
 
                 // Start parsing
-                EvalStruct s = parser.module(parser).s;
+                Context s = parser.module(parser).s;
                 //LLVMVerifyModule(mod, LLVMAbortProcessAction, error);
                 //LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
 

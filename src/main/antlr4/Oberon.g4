@@ -1,4 +1,4 @@
-grammar Expr;
+grammar Oberon;
 
 @header {
 package org.isu.oberon;
@@ -15,7 +15,7 @@ import static org.bytedeco.javacpp.LLVM.*;
 
       */
 
-module [ExprParser parser] returns [EvalStruct s]
+module [OberonParser parser] returns [Context s]
     :
         MODULE mid=IDENT SEMI
         /* importlist */
@@ -24,13 +24,13 @@ module [ExprParser parser] returns [EvalStruct s]
 
             LLVMTypeRef fac_arg = null;
 
-            LLVMValueRef main = LLVMAddFunction(mod, "@MODULEBLOCK@", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+            LLVMValueRef main = LLVMAddFunction(mod, $mid.text, LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
             LLVMSetFunctionCallConv(main, LLVMCCallConv);
 
 
             LLVMBuilderRef builder = LLVMCreateBuilder();
 
-            $s = new EvalStruct($parser, mod, main, builder);
+            $s = new Context($parser, mod, main, builder);
 
             $s.createSymbolTable();
             $s.addModule($mid.text);
@@ -54,11 +54,11 @@ module [ExprParser parser] returns [EvalStruct s]
         }
     ;
 
-declarationSequence [EvalStruct s]:
+declarationSequence [Context s]:
     ( VAR (variableDeclaration [$s] SEMI ) + ) ?
 ;
 
-variableDeclaration [EvalStruct s] locals [Vector<String> vars]:
+variableDeclaration [Context s] locals [Vector<String> vars]:
    id=IDENT
         {
             $vars = new Vector<String>();
@@ -89,7 +89,7 @@ variableDeclaration [EvalStruct s] locals [Vector<String> vars]:
         }
    ;
 
-statementSequence  [EvalStruct s]:
+statementSequence  [Context s]:
    statement [$s]
    (
       SEMI
@@ -97,12 +97,12 @@ statementSequence  [EvalStruct s]:
    ) *
 ;
 
-statement [EvalStruct s]:
+statement [Context s]:
      assignment [$s]
    | returnOp [$s]
 ;
 
-assignment [EvalStruct s]:
+assignment [Context s]:
    id=IDENT ASSIGN e=expression [$s]
    {
         LLVMSetValueName($e.value.ref, $id.text);
@@ -110,7 +110,7 @@ assignment [EvalStruct s]:
    }
    ;
 
-returnOp [EvalStruct s]:
+returnOp [Context s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
@@ -121,7 +121,7 @@ returnOp [EvalStruct s]:
    }
    ;
 
-expression [EvalStruct s] returns [ArithValue value]
+expression [Context s] returns [ArithValue value]
     :
         m=mult[$s] { $value = $m.value; }
     (
@@ -139,7 +139,7 @@ pm returns [int value]
     |   MINUS { $value = $MINUS.type; }
     ;
 
-mult [EvalStruct s] returns [ArithValue value]
+mult [Context s] returns [ArithValue value]
     :
         t=term[$s] { $value = $t.value; }
     (
@@ -157,7 +157,7 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [EvalStruct s] returns [ArithValue value]
+term [Context s] returns [ArithValue value]
     :   NUMBER {
              // LLVMBasicBlockRef number = LLVMAppendBasicBlock($s.expr, "number");
              // LLVMPositionBuilderAtEnd($s.builder, number);
