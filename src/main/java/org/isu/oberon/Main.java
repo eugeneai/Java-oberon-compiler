@@ -6,10 +6,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.bytedeco.javacpp.*;
 import static org.bytedeco.javacpp.LLVM.*;
 
 public class Main {
@@ -17,6 +15,7 @@ public class Main {
         // Show where we are.
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
+        Context.initializeTypeTable();
         BytePointer error = new BytePointer((Pointer)null); // Used to retrieve messages from functions
         LLVMLinkInMCJIT();
         LLVMInitializeNativeAsmPrinter();
@@ -29,12 +28,12 @@ public class Main {
                 System.out.println(String.format("Processing file: '%s': ", fileName));
                 CharStream input = CharStreams.fromFileName(fileName);
 
-                org.isu.oberon.ExprLexer lexer = new org.isu.oberon.ExprLexer(input);
-                org.isu.oberon.ExprParser parser = new org.isu.oberon.ExprParser(new CommonTokenStream(lexer));
+                org.isu.oberon.OberonLexer lexer = new org.isu.oberon.OberonLexer(input);
+                org.isu.oberon.OberonParser parser = new org.isu.oberon.OberonParser(new CommonTokenStream(lexer));
                 // parser.addParseListener(new MyListener());
 
                 // Start parsing
-                EvalStruct s = parser.module(parser).s;
+                Context s = parser.module(parser).s;
                 //LLVMVerifyModule(mod, LLVMAbortProcessAction, error);
                 //LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
 
@@ -59,7 +58,7 @@ public class Main {
                 LLVMRunPassManager(pass, s.mod);
 
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
-                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.main, 0, exec_args);
+                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.func, 0, exec_args);
                 System.out.println(" ----> Result: " + LLVMGenericValueToInt(exec_res, 0));
 
                 LLVMDisposePassManager(pass);

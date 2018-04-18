@@ -4,24 +4,46 @@ import java.util.HashMap;
 
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.LLVM.*;
-import static org.bytedeco.javacpp.LLVM.*;
 
 
-public class EvalStruct {
+public class Context {
 
-    public final org.isu.oberon.ExprParser parser;
+    public /* static */ final org.isu.oberon.OberonParser parser;
     final LLVMModuleRef mod;
-    public final LLVMValueRef main; // FIXME: rename main as function.
+    public final LLVMValueRef func;
     public final LLVMBuilderRef builder;
-    SymbolTables tables = null; // FIXME: It must be only the current hashtable.
+    public final HashMap<String,Symbol> symbols = new HashMap<>();
+    public static HashMap<String, Symbol> types = null;
+    public Context parent = null;
 
-    EvalStruct(org.isu.oberon.ExprParser parser, LLVMModuleRef mod, LLVMValueRef main, LLVMBuilderRef builder) {
+    public Context(org.isu.oberon.OberonParser parser,
+            LLVMModuleRef mod,
+            LLVMValueRef func,
+            LLVMBuilderRef builder,
+            Context parent) {
         this.parser=parser;
         this.mod=mod;
-        this.main=main;
+        this.func=func;
         this.builder=builder;
+        this.parent=parent;
+    }
 
-        initializeTypeTable();
+    public Context(org.isu.oberon.OberonParser parser,
+            LLVMModuleRef mod,
+            LLVMValueRef func,
+            LLVMBuilderRef builder) {
+        this.parser=parser;
+        this.mod=mod;
+        this.func=func;
+        this.builder=builder;
+    }
+
+    public Context(Context parent) {
+        this.parent = parent;
+        this.parser = parent.parser;
+        this.mod = parent.mod;
+        this.func = parent.func;
+        this.builder = parent.builder;
     }
 
     public void setExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
@@ -47,7 +69,6 @@ public class EvalStruct {
 
     public boolean IdExists(String name) throws FailedPredicateException {
         if (! getCurrent().containsKey(name)) {
-            System.out.println(String.format("FATAL: Identifier '%s' was not defined", name));
             throw new FailedPredicateException(parser,
                     "symbol-does-not-exist",
                     String.format("The '%s' identifier was not defined", name));
@@ -61,7 +82,7 @@ public class EvalStruct {
     }
 
     public TypeSymbol getType(String name) throws SymbolTypeException{
-        Symbol sym = tables.get(name);
+        Symbol sym = get(name);
         if (sym == null) {
             throw new SymbolTypeException(parser,
                     "type-not-found",
@@ -84,35 +105,46 @@ public class EvalStruct {
     }
 
     private Symbol addSymbol(Symbol sym){
+        return Context.addSymbol(getCurrent(), sym);
+    }
+
+    private static Symbol addSymbol(HashMap<String,Symbol> table, Symbol sym) {
         System.out.println(String.format("Added symbol: '%s':'%s'",
                 sym.name, sym.getClass().getName()));
-        return getCurrent().put(sym.name, sym);
+        table.put(sym.name, sym);
+        return sym;
     }
 
-    public HashMap<String,Symbol> createSymbolTable(){
-        return tables.push();
+    public Context newContext(){
+        return new Context(this);
     }
 
-    public HashMap<String,Symbol> removeSymbolTable() {
-        return tables.pop();
-    }
-
-    private void initializeTypeTable() {
-        HashMap<String,Symbol> types = new HashMap<>();
-        tables = new SymbolTables(types);
-
-        addSymbol(new IntegerType());
-        addSymbol(new FloatType());
+    public static void initializeTypeTable() {
+        if (types == null) {
+            types = new HashMap<>();
+        };
+        addSymbol(types, new IntegerType());
+        addSymbol(types, new FloatType());
         // FIXME: add other basic types: REAL, FLOAT, CARDINAL, STRING, CHAR
     }
 
     private HashMap<String,Symbol> getCurrent() {
-        return tables.getCurrent();
+        return symbols;
     }
 
     public NumberType infixTypeCast(ArithValue op1, ArithValue op2) {
         NumberType t1 = op1.type;
         NumberType t2 = op2.type;
         return t1; // FIXME: implement implicit casting.
+    }
+
+    public Symbol get(String name) {
+        if (symbols.containsKey(name)) {
+            return symbols.get(name);
+        };
+        if (parent!=null) {
+            return parent.get(name);
+        }
+        return types.get(name);
     }
 }

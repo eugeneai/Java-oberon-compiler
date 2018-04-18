@@ -10,19 +10,19 @@ public class FloatType extends NumberType {
     }
 
     @Override
-    public ArithValue infixOp(EvalStruct s, ArithValue arg1, int op, ArithValue arg2) {
+    public ArithValue infixOp(Context s, ArithValue arg1, int op, ArithValue arg2) {
         LLVMValueRef res;
         switch (op) {
-            case org.isu.oberon.ExprParser.PLUS:
+            case org.isu.oberon.OberonParser.PLUS:
                 res = LLVMBuildFAdd(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.MINUS:
+            case org.isu.oberon.OberonParser.MINUS:
                 res = LLVMBuildFSub(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.MUL:
+            case org.isu.oberon.OberonParser.MUL:
                 res =  LLVMBuildFMul(s.builder, arg1.ref, arg2.ref, "");
                 break;
-            case org.isu.oberon.ExprParser.DIV:
+            case org.isu.oberon.OberonParser.DIV:
                 res = LLVMBuildFDiv(s.builder, arg1.ref, arg2.ref, ""); // FIXME: Signed op.
                 break;
             default:
