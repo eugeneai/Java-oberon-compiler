@@ -106,26 +106,38 @@ procedureBody [Context c]:
    block [$c]
    ;
 
-
 statementSequence  [Context s]:
-     statement [$s]
-   | statement [$s]
-     SEMI
-     statementSequence [$s]
+   statement [$s]
+   (
+      SEMI
+      statement [$s]
+   ) *
 ;
-
-/*
-checkstatement [Context s]:
-   {_input.LA(1) != END}? statement [$s]
-   {true}? statement [$s]
-;
-*/
 
 statement [Context s]:
      assignment [$s]
    | returnOp [$s]
    |
 ;
+
+assignment [Context s]:
+   id=IDENT ASSIGN e=expression [$s]
+   {
+        LLVMSetValueName($e.value.ref, $id.text);
+        $s.setExpr($id.text, $e.value.ref);
+   }
+   ;
+
+returnOp [Context s]:
+   RETURN e=expression [$s]
+   {
+       // FIXME: Block "end" migt be useful for Exceptions and Exits.
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
+       LLVMPositionBuilderAtEnd($s.builder, end);
+
+       LLVMBuildRet($s.builder, $e.value.ref);
+   }
+   ;
 
 expression [Context s] returns [ArithValue value]
     :
@@ -184,28 +196,6 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
         }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
-
-
-assignment [Context s]:
-   id=IDENT ASSIGN e=expression [$s]
-   {
-        LLVMSetValueName($e.value.ref, $id.text);
-        $s.setExpr($id.text, $e.value.ref);
-   }
-   ;
-
-returnOp [Context s]:
-   RETURN e=expression [$s]
-   {
-       // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
-       LLVMPositionBuilderAtEnd($s.builder, end);
-
-       LLVMBuildRet($s.builder, $e.value.ref);
-   }
-   ;
-
-
 
 /* Lexical rules */
 
