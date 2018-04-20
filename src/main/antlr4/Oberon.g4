@@ -51,8 +51,9 @@ block [Context s]:
     ;
 
 declarationSequence [Context s]:
-    ( VAR (variableDeclaration [$s] SEMI ) + ) ?
-;
+      ( VAR (variableDeclaration [$s] SEMI ) + )?
+      ( procedureDeclaration [$s] SEMI ) *
+    ;
 
 variableDeclaration [Context s] locals [Vector<String> vars]:
    id=IDENT
@@ -84,6 +85,27 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
             };
         }
    ;
+
+procedureDeclaration [Context c]
+   :
+      pid=procedureHeading [$c]
+      SEMI
+      procedureBody [$c]
+      eid=IDENT
+      { $pid.text.equals($eid.text) }?
+   ;
+
+procedureHeading [Context c] returns [String value]:
+   PROCEDURE
+   apid=IDENT
+   LPAR RPAR
+   { $value = $apid.text; }
+   ;
+
+procedureBody [Context c]:
+   block [$c]
+   ;
+
 
 statementSequence  [Context s]:
      statement [$s]
@@ -192,6 +214,8 @@ END   : 'END'   ;
 MODULE: 'MODULE';
 VAR   : 'VAR'   ;
 RETURN: 'RETURN';
+
+PROCEDURE: 'PROCEDURE';
 
 fragment NUM : [0-9]+ ;
 

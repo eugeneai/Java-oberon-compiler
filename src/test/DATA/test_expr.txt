@@ -1,6 +1,12 @@
 MODULE test;
 VAR i, j:INTEGER;
     k:FLOAT;
+
+PROCEDURE dddd();
+BEGIN
+  RETURN 42;
+END dddd ;
+
 BEGIN
   j:=1;
   i:=1 * 9 + 2 * 8;
