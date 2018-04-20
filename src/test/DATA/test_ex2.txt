@@ -1,4 +1,4 @@
 MODULE test2;
 BEGIN
 RETURN 1+2*3+4;
-END test2;
+END test2.

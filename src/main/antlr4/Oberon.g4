@@ -37,11 +37,8 @@ module [OberonParser parser] returns [Context s]
         declarationSequence [$s]
         block [$s]
         eid=IDENT
-        {! $mid.text.equals($eid.text) }?
+        { $mid.text.equals($eid.text) }?
         DOT
-        {
-
-        }
         EOF
     ;
 
@@ -145,17 +142,18 @@ md returns [int value]
     ;
 
 term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type]
-    : FLOAT {
-                   $type = (FloatType) $s.getType("FLOAT");
-                   $ref = LLVMConstRealOfString(LLVMFloatType(),
-                                                $FLOAT.text); // FIXME: chack ref on null
-                   $value = new ArithValue($type, $ref);
-            }
-    | NUMBER {
-             $type = (IntegerType) $s.getType("INTEGER");
-             $ref = LLVMConstIntOfString(LLVMInt64Type(),
-                                         $NUMBER.text,
+    :
+    n=NUMBER {
+             if ($n.text.contains(".")) {
+                 $type = (FloatType) $s.getType("FLOAT");
+                 $ref = LLVMConstRealOfString(LLVMFloatType(),
+                                              $n.text);
+             } else {
+                 $type = (IntegerType) $s.getType("INTEGER");
+                 $ref = LLVMConstIntOfString(LLVMInt64Type(),
+                                         $n.text,
                                          (byte) 10);
+             };
              $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
@@ -195,8 +193,9 @@ MODULE: 'MODULE';
 VAR   : 'VAR'   ;
 RETURN: 'RETURN';
 
-FLOAT   : '-'?[0-9]*[.]([eE][0-9]+)? ;
-NUMBER  : '-'?[0-9]+ ;
+fragment NUM : [0-9]+ ;
+
+NUMBER   : '-'?(NUM | NUM?[.]NUM([Ee]NUM)?);
 
 PLUS : '+' ;
 MINUS: '-' ;
