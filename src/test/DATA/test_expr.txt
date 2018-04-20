@@ -4,4 +4,4 @@ BEGIN
   j:=1;
   i:=1 * 9 + 2 * 8;
   RETURN j+i;
-END test1.
+END test.

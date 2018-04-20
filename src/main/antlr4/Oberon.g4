@@ -37,16 +37,12 @@ module [OberonParser parser] returns [Context s]
         declarationSequence [$s]
         block [$s]
         eid=IDENT
-        {
-            if ($mid.text != $eid.text) {
-                throw new FailedPredicateException($s.parser,
-                    "head-tail-module-name-mismatch",
-                    "Tail and head module names must be equal");
-            }
-        }
+        {! $mid.text.equals($eid.text) }?
         DOT
         {
+
         }
+        EOF
     ;
 
 block [Context s]:
@@ -93,36 +89,24 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
    ;
 
 statementSequence  [Context s]:
-   statement [$s]
-   (
-      SEMI
-      statement [$s]
-   ) *
+     statement [$s]
+   | statement [$s]
+     SEMI
+     statementSequence [$s]
 ;
+
+/*
+checkstatement [Context s]:
+   {_input.LA(1) != END}? statement [$s]
+   {true}? statement [$s]
+;
+*/
 
 statement [Context s]:
      assignment [$s]
    | returnOp [$s]
+   |
 ;
-
-assignment [Context s]:
-   id=IDENT ASSIGN e=expression [$s]
-   {
-        LLVMSetValueName($e.value.ref, $id.text);
-        $s.setExpr($id.text, $e.value.ref);
-   }
-   ;
-
-returnOp [Context s]:
-   RETURN e=expression [$s]
-   {
-       // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
-       LLVMPositionBuilderAtEnd($s.builder, end);
-
-       LLVMBuildRet($s.builder, $e.value.ref);
-   }
-   ;
 
 expression [Context s] returns [ArithValue value]
     :
@@ -181,6 +165,28 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
+
+assignment [Context s]:
+   id=IDENT ASSIGN e=expression [$s]
+   {
+        LLVMSetValueName($e.value.ref, $id.text);
+        $s.setExpr($id.text, $e.value.ref);
+   }
+   ;
+
+returnOp [Context s]:
+   RETURN e=expression [$s]
+   {
+       // FIXME: Block "end" migt be useful for Exceptions and Exits.
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
+       LLVMPositionBuilderAtEnd($s.builder, end);
+
+       LLVMBuildRet($s.builder, $e.value.ref);
+   }
+   ;
+
+
+
 /* Lexical rules */
 
 BEGIN : 'BEGIN' ;
@@ -205,6 +211,8 @@ COMMA: ',' ;
 
 ASSIGN: ':=';
 
-IDENT   : [_a-zA-Z][_a-zA-Z0-9]* ;
 
 WS : [ \r\t\u000C\n]+ -> skip ;
+
+IDENT   : [_a-zA-Z][_a-zA-Z0-9]* ;
+
