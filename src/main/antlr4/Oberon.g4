@@ -86,9 +86,13 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
         }
    ;
 
-procedureDeclaration [Context c]
+procedureDeclaration [Context c] locals [Context p]
    :
       pid=procedureHeading [$c]
+      {
+          $p = c.newContext();
+
+      }
       SEMI
       procedureBody [$c]
       eid=IDENT
