@@ -2,10 +2,10 @@ MODULE test;
 VAR i, j:INTEGER;
     k:FLOAT;
 
-PROCEDURE dddd();
+PROCEDURE a();
 BEGIN
   RETURN 42;
-END dddd ;
+END a ;
 
 BEGIN
   j:=1;

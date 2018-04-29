@@ -88,18 +88,34 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
 
 procedureDeclaration [Context c]
    :
-      pid=procedureHeading [$c]
+      h=procedureHeading [$c]
       SEMI
-      procedureBody [$c]
+      procedureBody [$h.fc] // FIXME:fc
       eid=IDENT
-      { $pid.text.equals($eid.text) }?
+      {
+         $h.name.equals($eid.text)
+      }?
    ;
 
-procedureHeading [Context c] returns [String value]:
+procedureHeading [Context c] returns [String name, Context fc]:
    PROCEDURE
    apid=IDENT
-   LPAR RPAR
-   { $value = $apid.text; }
+   LPAR RPAR   // FIXME: Add Variables
+     {
+        LLVMTypeRef fac_arg = null;
+
+        LLVMValueRef proc = LLVMAddFunction($c.mod, $apid.text,
+               LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+        LLVMSetFunctionCallConv(proc, LLVMCCallConv);
+
+        LLVMBuilderRef builder = LLVMCreateBuilder();
+
+        $fc = new Context($c.parser, $c.mod, proc, builder, $c);
+
+        $name = $apid.text;
+
+        $c.addProc($apid.text, proc);
+     }
    ;
 
 procedureBody [Context c]:
