@@ -86,24 +86,36 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
         }
    ;
 
-procedureDeclaration [Context c] locals [Context p]
+procedureDeclaration [Context c]
    :
-      pid=procedureHeading [$c]
-      {
-          $p = c.newContext();
-
-      }
+      h=procedureHeading [$c]
       SEMI
-      procedureBody [$c]
+      procedureBody [$h.fc] // FIXME:fc
       eid=IDENT
-      { $pid.text.equals($eid.text) }?
+      {
+         $h.name.equals($eid.text)
+      }?
    ;
 
-procedureHeading [Context c] returns [String value]:
+procedureHeading [Context c] returns [String name, Context fc]:
    PROCEDURE
    apid=IDENT
-   LPAR RPAR
-   { $value = $apid.text; }
+   LPAR RPAR   // FIXME: Add Variables
+     {
+        LLVMTypeRef fac_arg = null;
+
+        LLVMValueRef proc = LLVMAddFunction($c.mod, $apid.text,
+               LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
+        LLVMSetFunctionCallConv(proc, LLVMCCallConv);
+
+        LLVMBuilderRef builder = LLVMCreateBuilder();
+
+        $fc = new Context($c.parser, $c.mod, proc, builder, $c);
+
+        $name = $apid.text;
+
+        $c.addProc($apid.text, proc);
+     }
    ;
 
 procedureBody [Context c]:
@@ -123,25 +135,6 @@ statement [Context s]:
    | returnOp [$s]
    |
 ;
-
-assignment [Context s]:
-   id=IDENT ASSIGN e=expression [$s]
-   {
-        LLVMSetValueName($e.value.ref, $id.text);
-        $s.setExpr($id.text, $e.value.ref);
-   }
-   ;
-
-returnOp [Context s]:
-   RETURN e=expression [$s]
-   {
-       // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
-       LLVMPositionBuilderAtEnd($s.builder, end);
-
-       LLVMBuildRet($s.builder, $e.value.ref);
-   }
-   ;
 
 expression [Context s] returns [ArithValue value]
     :
@@ -200,6 +193,28 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
         }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
+
+
+assignment [Context s]:
+   id=IDENT ASSIGN e=expression [$s]
+   {
+        LLVMSetValueName($e.value.ref, $id.text);
+        $s.setExpr($id.text, $e.value.ref);
+   }
+   ;
+
+returnOp [Context s]:
+   RETURN e=expression [$s]
+   {
+       // FIXME: Block "end" migt be useful for Exceptions and Exits.
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
+       LLVMPositionBuilderAtEnd($s.builder, end);
+
+       LLVMBuildRet($s.builder, $e.value.ref);
+   }
+   ;
+
+
 
 /* Lexical rules */
 

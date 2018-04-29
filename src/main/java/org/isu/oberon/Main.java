@@ -57,8 +57,12 @@ public class Main {
                 LLVMAddCFGSimplificationPass(pass);
                 LLVMRunPassManager(pass, s.mod);
 
+                ProcSymbol proc_to_run = s.getProc("a");
+                // LLVMValueRef proc_to_ru_ref = s.func;
+                LLVMValueRef proc_to_run_ref = proc_to_run.proc;
+
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
-                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, s.func, 0, exec_args);
+                LLVMGenericValueRef exec_res = LLVMRunFunction(engine, proc_to_run_ref, 0, exec_args);
                 System.out.println(" ----> Result: " + LLVMGenericValueToInt(exec_res, 0));
 
                 LLVMDisposePassManager(pass);

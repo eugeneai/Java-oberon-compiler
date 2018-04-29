@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.LLVM.*;
 
+import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
+
 
 public class Context {
 
@@ -12,6 +14,7 @@ public class Context {
     final LLVMModuleRef mod;
     public final LLVMValueRef func;
     public final LLVMBuilderRef builder;
+    public LLVMBasicBlockRef body;
     public final HashMap<String,Symbol> symbols = new HashMap<>();
     public static HashMap<String, Symbol> types = null;
     public Context parent = null;
@@ -26,6 +29,7 @@ public class Context {
         this.func=func;
         this.builder=builder;
         this.parent=parent;
+        appendBodyBlock();
     }
 
     public Context(org.isu.oberon.OberonParser parser,
@@ -36,14 +40,20 @@ public class Context {
         this.mod=mod;
         this.func=func;
         this.builder=builder;
+        appendBodyBlock();
     }
 
-    public Context(Context parent) {
+    public Context(Context parent) {  // Copy Constructor;
         this.parent = parent;
         this.parser = parent.parser;
         this.mod = parent.mod;
         this.func = parent.func;
         this.builder = parent.builder;
+        this.body = parent.body;
+    }
+
+    private void appendBodyBlock() {
+        body= LLVMAppendBasicBlock(func, "body");
     }
 
     public void setExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
@@ -104,6 +114,14 @@ public class Context {
 
     public void addModule(String name){
         addSymbol(new ModuleSymbol(name));
+    }
+    public void addProc(String name, LLVMValueRef proc){ // FIXE: Add parameters
+        addSymbol(new ProcSymbol(name, proc));
+    }
+
+    public ProcSymbol getProc(String name) {
+        //FIXME: Test type of "name" to be a PROCEDURE before.
+        return (ProcSymbol) get(name);
     }
 
     private Symbol addSymbol(Symbol sym){
