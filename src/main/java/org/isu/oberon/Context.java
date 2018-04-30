@@ -79,7 +79,7 @@ public class Context {
 
     public boolean IdExists(String name) throws FailedPredicateException {
         if (! getCurrent().containsKey(name)) {
-            String msg = String.format("The '%s' identifier is not defined", name);
+            String msg = String.format("Identifier '%s' is not defined", name);
             System.err.println(msg);
             throw new FailedPredicateException(parser,
                     "symbol-does-not-exist",

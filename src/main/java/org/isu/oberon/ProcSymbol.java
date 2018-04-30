@@ -66,8 +66,6 @@ public class ProcSymbol extends TypeSymbol {
         return name;
     }
 
-
-
     @Override
     protected LLVMValueRef genConstant(Context c) {
         return null;
@@ -95,14 +93,14 @@ public class ProcSymbol extends TypeSymbol {
         if (s>0) {
             func_ref = LLVMFunctionType(type.genRef(),
                     fac_arg[0],
-                    (byte) args.size(),
+                    s,
                     0);
         } else {
             LLVMTypeRef [] null_arg = {LLVMInt64Type()};
-            // FIXME: Is there a better way to define zero-length argumant list;
+            // FIXME: Is there a better way to define zero-length argument list;
             func_ref = LLVMFunctionType(type.genRef(),
                     null_arg[0],
-                    (byte) args.size(),
+                    s,
                     0);
         }
 
@@ -110,7 +108,7 @@ public class ProcSymbol extends TypeSymbol {
 
         i=0;
         for (VarSymbol arg: args) {
-            arg.setExpr(LLVMGetParam(this.proc, i));
+            // arg.setExpr(LLVMGetParam(this.proc, i));
             i++;
         }
 

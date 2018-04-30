@@ -8,7 +8,7 @@ public class ModuleSymbol extends ProcSymbol{
     public final LLVM.LLVMModuleRef mod;
     ModuleSymbol(String name) {
         super(name);
-        mod = LLVMModuleCreateWithName(name+"_module");
+        mod = LLVMModuleCreateWithName(name);
     }
 
     @Override
@@ -16,4 +16,9 @@ public class ModuleSymbol extends ProcSymbol{
         return true;
     }
 
+
+    @Override
+    public String tangle(String name) {
+        return "@MAIN@";
+    }
 }

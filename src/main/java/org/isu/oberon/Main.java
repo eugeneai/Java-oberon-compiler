@@ -57,8 +57,8 @@ public class Main {
                 LLVMAddCFGSimplificationPass(pass);
                 LLVMRunPassManager(pass, s.getModule().mod);
 
-                ProcSymbol proc_to_run = s.getProc("a");
-                // LLVMValueRef proc_to_ru_ref = s.func;
+                // ProcSymbol proc_to_run = s.getProc("@MAIN@");
+                ProcSymbol proc_to_run = s.proc;
                 LLVMValueRef proc_to_run_ref = proc_to_run.proc;
 
                 LLVMGenericValueRef exec_args = LLVMCreateGenericValueOfInt(LLVMInt64Type(), 10, 0);
