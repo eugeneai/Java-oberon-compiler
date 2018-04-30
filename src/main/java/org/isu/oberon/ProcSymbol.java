@@ -90,18 +90,31 @@ public class ProcSymbol extends TypeSymbol {
             i++;
         }
 
+        LLVMTypeRef func_ref=null;
+
         if (s>0) {
-            return LLVMFunctionType(type.genRef(),
+            func_ref = LLVMFunctionType(type.genRef(),
                     fac_arg[0],
                     (byte) args.size(),
                     0);
         } else {
             LLVMTypeRef [] null_arg = {LLVMInt64Type()};
             // FIXME: Is there a better way to define zero-length argumant list;
-            return LLVMFunctionType(type.genRef(),
+            func_ref = LLVMFunctionType(type.genRef(),
                     null_arg[0],
                     (byte) args.size(),
                     0);
         }
+
+
+
+        i=0;
+        for (VarSymbol arg: args) {
+            arg.setExpr(LLVMGetParam(this.proc, i));
+            i++;
+        }
+
+
+        return func_ref;
     }
 }

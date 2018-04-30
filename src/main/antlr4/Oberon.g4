@@ -79,11 +79,12 @@ variableListDeclaration [Context s, int index] returns [int nextIndex] locals [V
             TypeSymbol t = $s.getType($ty.text);
             for (String var: $vars) {
                 VarSymbol var_s = $s.addVariable(var, $ty.text);
-                $s.setExpr(var, t.genDefaultValueRef(var_s, $s, $index));
                 if ($index >= 0) {
                     $s.proc.args.add(var_s);
                     $index++;
-                };
+                } else {
+
+                }
             };
             $nextIndex=$index;
         }

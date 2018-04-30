@@ -22,15 +22,8 @@ public abstract class TypeSymbol extends Symbol {
         return true;
     }
 
-    public LLVM.LLVMValueRef genDefaultValueRef(VarSymbol var,
-                                                         Context c,
-                                                         int index) {
-        // If index < 0, then use var name as value name referference
-        if (index>=0) {
-            return LLVMGetParam(c.proc.proc, index);
-        } else {
-            return genConstant(c);
-        }
+    public LLVM.LLVMValueRef genDefaultValueRef(VarSymbol var, Context c) {
+        return genConstant(c);
     }
 
     protected abstract LLVM.LLVMValueRef genConstant(Context c, String value);

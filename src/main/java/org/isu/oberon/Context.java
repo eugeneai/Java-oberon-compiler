@@ -59,7 +59,7 @@ public class Context {
     public void setExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
         IdExists(name);
         VarSymbol var = (VarSymbol) getCurrent().get(name);
-        var.ref = expr;
+        var.setExpr(expr);
     }
 
     public ArithValue getRef(String name) {

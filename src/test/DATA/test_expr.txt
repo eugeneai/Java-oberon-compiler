@@ -1,7 +1,4 @@
 MODULE test;
-VAR i, j:INTEGER;
-    k:FLOAT;
-
 PROCEDURE a(q:INTEGER; qq:FLOAT);
 BEGIN
 END a ;

@@ -15,4 +15,8 @@ public class VarSymbol extends Symbol {
         this.type = type;
     }
 
+    public void setExpr(LLVMValueRef ref) {
+        this.ref = ref;
+    }
+
 }
