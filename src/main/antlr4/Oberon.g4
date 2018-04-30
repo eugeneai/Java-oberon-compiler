@@ -20,19 +20,14 @@ module [OberonParser parser] returns [Context s]
         MODULE mid=IDENT SEMI
         /* importlist */
         {
-            LLVMModuleRef mod = LLVMModuleCreateWithName($mid.text);
-
-            LLVMTypeRef fac_arg = null;
-
-            LLVMValueRef main = LLVMAddFunction(mod, $mid.text+"@module", LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
-            LLVMSetFunctionCallConv(main, LLVMCCallConv);
-
 
             LLVMBuilderRef builder = LLVMCreateBuilder();
 
-            $s = new Context($parser, mod, main, builder);
+            $s = new Context($parser, new ModuleSymbol($mid.text), builder);
 
-            $s.addModule($mid.text);
+            ModuleSymbol mod = $s.addModule($mid.text);
+            mod.createProc();
+
         }
         declarationSequence [$s]
         block [$s]
@@ -51,11 +46,11 @@ block [Context s]:
     ;
 
 declarationSequence [Context s]:
-      ( VAR (variableDeclaration [$s] SEMI ) + )?
+      ( VAR (variablesDeclaration [$s, -1] SEMI ) + )?
       ( procedureDeclaration [$s] SEMI ) *
     ;
 
-variableDeclaration [Context s] locals [Vector<String> vars]:
+variablesDeclaration [Context s, int index] returns [int nextIndex] locals [Vector<String> vars]:
    id=IDENT
         {
             $vars = new Vector<String>();
@@ -80,9 +75,16 @@ variableDeclaration [Context s] locals [Vector<String> vars]:
    COLON
    ty=IDENT
         {
+            int i = $index;
             for (String var: $vars) {
-                $s.addVariable(var, $ty.text);
+                if ($index!=-1) {
+                    $s.addVariable(var, $ty.text, i);
+                } else {
+                    $s.addVariable(var, $ty.text);
+                }
+                i++;
             };
+            $nextIndex=i;
         }
    ;
 
@@ -100,22 +102,35 @@ procedureDeclaration [Context c]
 procedureHeading [Context c] returns [String name, Context fc]:
    PROCEDURE
    apid=IDENT
-   LPAR RPAR   // FIXME: Add Variables
      {
         LLVMTypeRef fac_arg = null;
 
+        /*
         LLVMValueRef proc = LLVMAddFunction($c.mod, $apid.text,
                LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
         LLVMSetFunctionCallConv(proc, LLVMCCallConv);
+        */
 
         LLVMBuilderRef builder = LLVMCreateBuilder();
 
-        $fc = new Context($c.parser, $c.mod, proc, builder, $c);
+        $fc = new Context($c.parser, new ProcSymbol($apid.text), builder, $c);
 
         $name = $apid.text;
 
-        $c.addProc($apid.text, proc);
+        $c.addProc($apid.text);
      }
+   LPAR
+   (   (
+          ni=variablesDeclaration [$fc, 0]
+          (
+             SEMI ni=variablesDeclaration [$fc, $ni.nextIndex]
+          )*
+       ) ?
+   )?
+   RPAR   // FIXME: Add Variables
+   {
+       $fc.proc.createProc($fc.getModule());
+   }
    ;
 
 procedureBody [Context c]:
@@ -207,7 +222,7 @@ returnOp [Context s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.func, "end");
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, "end");
        LLVMPositionBuilderAtEnd($s.builder, end);
 
        LLVMBuildRet($s.builder, $e.value.ref);

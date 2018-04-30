@@ -1,9 +1,11 @@
 package org.isu.oberon;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.javacpp.Pointer;
 
 import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
 
@@ -11,49 +13,45 @@ import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
 public class Context {
 
     public /* static */ final org.isu.oberon.OberonParser parser;
-    final LLVMModuleRef mod;
-    public final LLVMValueRef func;
+    public ProcSymbol proc;
     public final LLVMBuilderRef builder;
-    public LLVMBasicBlockRef body;
     public final HashMap<String,Symbol> symbols = new HashMap<>();
     public static HashMap<String, Symbol> types = null;
     public Context parent = null;
 
     public Context(org.isu.oberon.OberonParser parser,
-            LLVMModuleRef mod,
-            LLVMValueRef func,
+            ProcSymbol proc,
             LLVMBuilderRef builder,
             Context parent) {
         this.parser=parser;
-        this.mod=mod;
-        this.func=func;
+        this.proc=proc;
         this.builder=builder;
         this.parent=parent;
-        appendBodyBlock();
     }
 
     public Context(org.isu.oberon.OberonParser parser,
-            LLVMModuleRef mod,
-            LLVMValueRef func,
-            LLVMBuilderRef builder) {
+                   ProcSymbol proc,
+                   LLVMBuilderRef builder) {
         this.parser=parser;
-        this.mod=mod;
-        this.func=func;
+        this.proc=proc;
         this.builder=builder;
-        appendBodyBlock();
     }
+
 
     public Context(Context parent) {  // Copy Constructor;
         this.parent = parent;
         this.parser = parent.parser;
-        this.mod = parent.mod;
-        this.func = parent.func;
+        this.proc = parent.proc;
         this.builder = parent.builder;
-        this.body = parent.body;
     }
 
-    private void appendBodyBlock() {
-        body= LLVMAppendBasicBlock(func, "body");
+    public ModuleSymbol getModule() {
+        if (proc.isModule()) return (ModuleSymbol) proc;
+        return parent.getModule();
+    }
+
+    public LLVMBasicBlockRef getBody() {
+        return proc.body;
     }
 
     public void setExpr(String name, LLVMValueRef expr) throws FailedPredicateException {
@@ -88,9 +86,13 @@ public class Context {
         return true;
     }
 
-    public VarSymbol addVariable(String name, String typeName) throws FailedPredicateException {
+    public VarSymbol addVariable(String name, String typeName, int index) throws FailedPredicateException {
         TypeSymbol t = (TypeSymbol) getType(typeName);
-        return (VarSymbol) addSymbol(new VarSymbol(name, t));
+        return (VarSymbol) addSymbol(new VarSymbol(name, t, index));
+    }
+
+    public VarSymbol addVariable (String name, String typeName) throws FailedPredicateException {
+        return addVariable(name, typeName, VarSymbol.NOINDEX);
     }
 
     public TypeSymbol getType(String name) throws SymbolTypeException{
@@ -112,11 +114,16 @@ public class Context {
         }
     }
 
-    public void addModule(String name){
-        addSymbol(new ModuleSymbol(name));
+    public ModuleSymbol addModule(String name){
+        return (ModuleSymbol) addSymbol(new ModuleSymbol(name));
     }
-    public void addProc(String name, LLVMValueRef proc){ // FIXE: Add parameters
-        addSymbol(new ProcSymbol(name, proc));
+
+    public ProcSymbol addProc(String name, Vector<VarSymbol> args){ // FIXE: Add parameters
+        return (ProcSymbol) addSymbol(new ProcSymbol(name, args));
+    }
+
+    public ProcSymbol addProc(String name){ // FIXE: Add parameters
+        return (ProcSymbol) addSymbol(new ProcSymbol(name));
     }
 
     public ProcSymbol getProc(String name) {

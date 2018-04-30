@@ -38,11 +38,11 @@ public class Main {
                 //LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
 
                 System.out.println("\n-------------------- dump ------------");
-                LLVMDumpModule(s.mod);
+                LLVMDumpModule(s.getModule().mod);
                 System.out.println("\n-------------------- exec ------------");
 
                 LLVMExecutionEngineRef engine = new LLVMExecutionEngineRef();
-                if(LLVMCreateJITCompilerForModule(engine, s.mod, 2, error) != 0) {
+                if(LLVMCreateJITCompilerForModule(engine, s.getModule().mod, 2, error) != 0) {
                     System.err.println(error.getString());
                     LLVMDisposeMessage(error);
                     System.exit(-1);
@@ -55,7 +55,7 @@ public class Main {
                 // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory
                 LLVMAddGVNPass(pass);
                 LLVMAddCFGSimplificationPass(pass);
-                LLVMRunPassManager(pass, s.mod);
+                LLVMRunPassManager(pass, s.getModule().mod);
 
                 ProcSymbol proc_to_run = s.getProc("a");
                 // LLVMValueRef proc_to_ru_ref = s.func;
