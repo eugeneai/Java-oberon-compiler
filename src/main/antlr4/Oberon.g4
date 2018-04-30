@@ -26,7 +26,8 @@ module [OberonParser parser] returns [Context s]
             $s = new Context($parser, new ModuleSymbol($mid.text), builder);
 
             ModuleSymbol mod = $s.addModule($mid.text);
-            mod.createProc();
+            mod.setType($s.getType("@VOID@"));
+            mod.createProc($s);
 
         }
         declarationSequence [$s]
@@ -46,11 +47,11 @@ block [Context s]:
     ;
 
 declarationSequence [Context s]:
-      ( VAR (variablesDeclaration [$s, -1] SEMI ) + )?
+      ( VAR (variableListDeclaration [$s, -1] SEMI ) + )?
       ( procedureDeclaration [$s] SEMI ) *
     ;
 
-variablesDeclaration [Context s, int index] returns [int nextIndex] locals [Vector<String> vars]:
+variableListDeclaration [Context s, int index] returns [int nextIndex] locals [Vector<String> vars]:
    id=IDENT
         {
             $vars = new Vector<String>();
@@ -80,6 +81,7 @@ variablesDeclaration [Context s, int index] returns [int nextIndex] locals [Vect
                 VarSymbol var_s = $s.addVariable(var, $ty.text);
                 $s.setExpr(var, t.genDefaultValueRef(var_s, $s, $index));
                 if ($index >= 0) {
+                    $s.proc.args.add(var_s);
                     $index++;
                 };
             };
@@ -98,7 +100,7 @@ procedureDeclaration [Context c]
       }?
    ;
 
-procedureHeading [Context c] returns [String name, Context fc]:
+procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbol retType]:
    PROCEDURE
    apid=IDENT
      {
@@ -109,18 +111,30 @@ procedureHeading [Context c] returns [String name, Context fc]:
         $name = $apid.text;
 
         $c.addProc($apid.text);
+
+        $retType=$c.getType("@VOID@");
      }
-   LPAR
-   (   (
-          ni=variablesDeclaration [$fc, 0]
-          (
-             SEMI ni=variablesDeclaration [$fc, $ni.nextIndex]
-          )*
-       ) ?
+   (
+       LPAR
+       (
+              ni=variableListDeclaration [$fc, 0]
+              (
+                 SEMI ni=variableListDeclaration [$fc, $ni.nextIndex]
+              )*
+       )?
+       RPAR   // FIXME: Add Variables
    )?
-   RPAR   // FIXME: Add Variables
    {
-       $fc.proc.createProc($fc.getModule());
+   }
+   (
+       COLON rt=IDENT
+       {
+           $retType=$c.getType($rt.text);
+       }
+   )?
+   {
+       $fc.proc.setType($retType);
+       $fc.proc.createProc($fc);
    }
    ;
 

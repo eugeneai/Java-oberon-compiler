@@ -120,8 +120,8 @@ public class Context {
         return (ModuleSymbol) addSymbol(new ModuleSymbol(name));
     }
 
-    public ProcSymbol addProc(String name, Vector<VarSymbol> args){ // FIXE: Add parameters
-        return (ProcSymbol) addSymbol(new ProcSymbol(name, args));
+    public ProcSymbol addProc(String name, Vector<VarSymbol> args, TypeSymbol type){ // FIXE: Add parameters
+        return (ProcSymbol) addSymbol(new ProcSymbol(name, args, type));
     }
 
     public ProcSymbol addProc(String name){ // FIXE: Add parameters
@@ -154,6 +154,7 @@ public class Context {
         };
         addSymbol(types, new IntegerType());
         addSymbol(types, new FloatType());
+        addSymbol(types, new VoidType());
         // FIXME: add other basic types: REAL, FLOAT, CARDINAL, STRING, CHAR
     }
 

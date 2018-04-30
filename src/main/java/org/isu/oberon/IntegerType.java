@@ -36,4 +36,9 @@ public class IntegerType extends NumberType {
         return LLVMConstIntOfString(LLVMInt64Type(),
                 val, (byte) 10);
     }
+
+    @Override
+    protected LLVMTypeRef genRef() {
+        return LLVMInt64Type();
+    }
 }

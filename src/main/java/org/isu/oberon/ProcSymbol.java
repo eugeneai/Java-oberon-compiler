@@ -6,24 +6,35 @@ import java.util.Vector;
 
 import static org.bytedeco.javacpp.LLVM.*;
 
-public class ProcSymbol extends Symbol {
+public class ProcSymbol extends TypeSymbol {
     public LLVM.LLVMValueRef proc = null;
     public Vector<VarSymbol> args = null;
     public LLVM.LLVMBasicBlockRef body = null;
+    public TypeSymbol type = null;
 
-    public ProcSymbol(String name, Vector<VarSymbol> args, LLVM.LLVMValueRef proc) {  // FIXME: Add parameters
+    public ProcSymbol(String name,
+                      Vector<VarSymbol> args,
+                      TypeSymbol type,
+                      LLVM.LLVMValueRef proc) {  // FIXME: Add parameters
         super(name);
         this.args = args;
+        this.type = type;
         this.proc=proc;
     }
 
-    public ProcSymbol(String name, Vector<VarSymbol> args) {
+    public ProcSymbol(String name, Vector<VarSymbol> args, TypeSymbol type) {
         super(name);
         this.args = args;
+        this.type = type;
     }
 
     public ProcSymbol(String name) {
         super(name);
+        this.args = new Vector<>();
+    }
+
+    public void setType(TypeSymbol type) {
+        this.type = type;
     }
 
     public Vector<VarSymbol> createArgs() {
@@ -39,21 +50,58 @@ public class ProcSymbol extends Symbol {
         return false;
     }
 
-    public LLVM.LLVMValueRef createProc(ModuleSymbol mod) {
-        LLVM.LLVMTypeRef fac_arg = null; // FIXME: no arguments
+    public LLVM.LLVMValueRef createProc(Context c) {
 
-        LLVM.LLVMValueRef proc = LLVMAddFunction(mod.mod,
-                tangle(name),
-                LLVMFunctionType(LLVMInt64Type(),
-                        fac_arg,
-                        0,
-                        0));
+        LLVM.LLVMValueRef proc = LLVMAddFunction(c.getModule().mod,
+                tangle(name), genRef());
+
         LLVMSetFunctionCallConv(proc, LLVMCCallConv);
+
         appendBodyBlock();
+
         return proc;
     }
 
     public String tangle(String name) {
         return name;
+    }
+
+
+
+    @Override
+    protected LLVMValueRef genConstant(Context c) {
+        return null;
+    }
+
+    @Override
+    protected LLVMValueRef genConstant(Context c, String value) {
+        return null;
+    }
+
+    @Override
+    protected LLVMTypeRef genRef() {
+
+        int s = args.size();
+        LLVM.LLVMTypeRef [] fac_arg = new LLVMTypeRef[s];
+
+        int i=0;
+        for (VarSymbol arg: args) {
+            fac_arg[i]=arg.type.genRef();
+            i++;
+        }
+
+        if (s>0) {
+            return LLVMFunctionType(type.genRef(),
+                    fac_arg[0],
+                    (byte) args.size(),
+                    0);
+        } else {
+            LLVMTypeRef [] null_arg = {LLVMInt64Type()};
+            // FIXME: Is there a better way to define zero-length argumant list;
+            return LLVMFunctionType(type.genRef(),
+                    null_arg[0],
+                    (byte) args.size(),
+                    0);
+        }
     }
 }

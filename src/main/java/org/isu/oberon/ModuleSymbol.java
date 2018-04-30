@@ -16,7 +16,4 @@ public class ModuleSymbol extends ProcSymbol{
         return true;
     }
 
-    public LLVM.LLVMValueRef createProc() {
-        return createProc(this);
-    }
 }

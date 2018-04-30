@@ -37,4 +37,9 @@ public class FloatType extends NumberType {
     protected LLVMValueRef genConstant(Context c, String val) {
         return LLVMConstRealOfString(LLVMFloatType(), val);
     }
+
+    @Override
+    protected LLVMTypeRef genRef() {
+        return LLVMFloatType();
+    }
 }

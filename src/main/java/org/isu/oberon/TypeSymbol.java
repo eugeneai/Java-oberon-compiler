@@ -37,4 +37,6 @@ public abstract class TypeSymbol extends Symbol {
 
     protected abstract LLVM.LLVMValueRef genConstant(Context c);
 
+    protected abstract LLVM.LLVMTypeRef genRef();
+
 }

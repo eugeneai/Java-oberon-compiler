@@ -5,6 +5,10 @@ Compiler for Oberon programming language implemented with Java, Antlr4, LLVM. A 
 
 https://www.inf.ethz.ch/personal/wirth/Oberon/Oberon07.Report.pdf
 
+## Исходный код Java-класса обрамления библиотеки LLVM
+
+https://github.com/bytedeco/javacpp-presets/blob/master/llvm/src/main/java/org/bytedeco/javacpp/LLVM.java
+
 ## Установка программного обеспечения
 
 ## Клонирование данного проекта
