@@ -32,4 +32,9 @@ public class FloatType extends NumberType {
         }
         return new ArithValue(this, res); // Should not get here
     }
+
+    @Override
+    protected LLVMValueRef genConstant(Context c, String val) {
+        return LLVMConstRealOfString(LLVMFloatType(), val);
+    }
 }

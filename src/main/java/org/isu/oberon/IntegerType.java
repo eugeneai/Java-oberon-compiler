@@ -31,4 +31,9 @@ public class IntegerType extends NumberType {
         return new ArithValue(this, res); // Should not get here
     }
 
+    @Override
+    protected LLVMValueRef genConstant(Context c, String val) {
+        return LLVMConstIntOfString(LLVMInt64Type(),
+                val, (byte) 10);
+    }
 }

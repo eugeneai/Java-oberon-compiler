@@ -1,6 +1,10 @@
 package org.isu.oberon;
 
-public class TypeSymbol extends Symbol {
+import org.bytedeco.javacpp.LLVM;
+
+import static org.bytedeco.javacpp.LLVM.LLVMGetParam;
+
+public abstract class TypeSymbol extends Symbol {
     public TypeSymbol parent;
 
     TypeSymbol(String name) {
@@ -18,5 +22,19 @@ public class TypeSymbol extends Symbol {
         return true;
     }
 
+    public LLVM.LLVMValueRef genDefaultValueRef(VarSymbol var,
+                                                         Context c,
+                                                         int index) {
+        // If index < 0, then use var name as value name referference
+        if (index>=0) {
+            return LLVMGetParam(c.proc.proc, index);
+        } else {
+            return genConstant(c);
+        }
+    }
+
+    protected abstract LLVM.LLVMValueRef genConstant(Context c, String value);
+
+    protected abstract LLVM.LLVMValueRef genConstant(Context c);
 
 }

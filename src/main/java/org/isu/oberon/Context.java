@@ -12,12 +12,14 @@ import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
 
 public class Context {
 
-    public /* static */ final org.isu.oberon.OberonParser parser;
+    public Context parent = null;
     public ProcSymbol proc;
     public final LLVMBuilderRef builder;
     public final HashMap<String,Symbol> symbols = new HashMap<>();
+
     public static HashMap<String, Symbol> types = null;
-    public Context parent = null;
+    public /* static */ final org.isu.oberon.OberonParser parser;
+
 
     public Context(org.isu.oberon.OberonParser parser,
             ProcSymbol proc,
@@ -87,8 +89,8 @@ public class Context {
     }
 
     public VarSymbol addVariable(String name, String typeName, int index) throws FailedPredicateException {
-        TypeSymbol t = (TypeSymbol) getType(typeName);
-        return (VarSymbol) addSymbol(new VarSymbol(name, t, index));
+        TypeSymbol t = getType(typeName);
+        return (VarSymbol) addSymbol(new VarSymbol(name, t));
     }
 
     public VarSymbol addVariable (String name, String typeName) throws FailedPredicateException {

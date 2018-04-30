@@ -75,16 +75,15 @@ variablesDeclaration [Context s, int index] returns [int nextIndex] locals [Vect
    COLON
    ty=IDENT
         {
-            int i = $index;
+            TypeSymbol t = $s.getType($ty.text);
             for (String var: $vars) {
-                if ($index!=-1) {
-                    $s.addVariable(var, $ty.text, i);
-                } else {
-                    $s.addVariable(var, $ty.text);
-                }
-                i++;
+                VarSymbol var_s = $s.addVariable(var, $ty.text);
+                $s.setExpr(var, t.genDefaultValueRef(var_s, $s, $index));
+                if ($index >= 0) {
+                    $index++;
+                };
             };
-            $nextIndex=i;
+            $nextIndex=$index;
         }
    ;
 
@@ -103,14 +102,6 @@ procedureHeading [Context c] returns [String name, Context fc]:
    PROCEDURE
    apid=IDENT
      {
-        LLVMTypeRef fac_arg = null;
-
-        /*
-        LLVMValueRef proc = LLVMAddFunction($c.mod, $apid.text,
-               LLVMFunctionType(LLVMInt64Type(), fac_arg, 0, 0));
-        LLVMSetFunctionCallConv(proc, LLVMCCallConv);
-        */
-
         LLVMBuilderRef builder = LLVMCreateBuilder();
 
         $fc = new Context($c.parser, new ProcSymbol($apid.text), builder, $c);
@@ -192,14 +183,10 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
     n=NUMBER {
              if ($n.text.contains(".")) {
                  $type = (FloatType) $s.getType("FLOAT");
-                 $ref = LLVMConstRealOfString(LLVMFloatType(),
-                                              $n.text);
              } else {
                  $type = (IntegerType) $s.getType("INTEGER");
-                 $ref = LLVMConstIntOfString(LLVMInt64Type(),
-                                         $n.text,
-                                         (byte) 10);
              };
+             $ref = $type.genConstant($s);
              $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
