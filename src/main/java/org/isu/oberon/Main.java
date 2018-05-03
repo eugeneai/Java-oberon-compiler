@@ -41,8 +41,9 @@ public class Main {
                 LLVMDumpModule(s.getModule().mod);
                 System.out.println("\n-------------------- exec ------------");
 
+                /*
                 LLVMExecutionEngineRef engine = new LLVMExecutionEngineRef();
-                if(LLVMCreateJITCompilerForModule(engine, s.getModule().mod, 2, error) != 0) {
+                if (LLVMCreateJITCompilerForModule(engine, s.getModule().mod, 2, error) != 0) {
                     System.err.println(error.getString());
                     LLVMDisposeMessage(error);
                     System.exit(-1);
@@ -67,6 +68,7 @@ public class Main {
 
                 LLVMDisposePassManager(pass);
                 LLVMDisposeExecutionEngine(engine);
+*/
                 LLVMDisposeBuilder(s.builder);
 
 
