@@ -28,6 +28,7 @@ module [OberonParser parser] returns [Context s]
             ModuleSymbol mod = (ModuleSymbol) $s.proc;
             mod.setType($s.getType("@VOID@"));
             mod.createProc($s);
+            LLVMPositionBuilderAtEnd($s.builder, $s.proc.body);
 
         }
         declarationSequence [$s]
@@ -106,12 +107,11 @@ procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbo
    apid=IDENT
      {
         LLVMBuilderRef builder = LLVMCreateBuilder();
+        // LLVMBuilderRef builder = $c.builder;
 
-        $fc = new Context($c.parser, new ProcSymbol($apid.text), builder, $c);
+        $fc = new Context($c.parser, $c.addProc($apid.text), builder, $c);
 
         $name = $apid.text;
-
-        $c.addProc($apid.text);
 
         $retType=$c.getType("@VOID@");
      }
@@ -135,7 +135,9 @@ procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbo
    )?
    {
        $fc.proc.setType($retType);
+       // header-createproc
        $fc.proc.createProc($fc);
+       LLVMPositionBuilderAtEnd($fc.builder, $fc.proc.body);
    }
    ;
 
@@ -202,10 +204,12 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
                  $type = (IntegerType) $s.getType("INTEGER");
              };
              $ref = $type.genConstant($s, $n.text);
+             System.out.println(String.format("CONSTANT: (%s) = %s", $type.name, $n.text));
              $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
         {
+             // term-proc
              $value = $s.getRef($id.text);
         }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
@@ -224,15 +228,16 @@ returnOp [Context s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       if ($s.proc.proc != null) {
-           LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, "end");
-           LLVMPositionBuilderAtEnd($s.builder, end);
 
-           LLVMBuildRet($s.builder, $e.value.ref);
-       } else {
-           System.err.println("ERROR: Null pointer!");
-           System.exit(1);
-       };
+       System.out.println("RETURN: from "+$s.proc.name);
+
+       assert $s.proc.proc != null : "ERROR: Null pointer!";
+
+       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_end");
+       LLVMPositionBuilderAtEnd($s.builder, end);
+       LLVMBuildRet($s.builder, $e.value.ref);
+
+       System.out.println("RETURN END: "+$s.proc.name);
    }
    ;
 

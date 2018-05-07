@@ -59,6 +59,12 @@ public class ProcSymbol extends TypeSymbol {
 
         LLVMSetFunctionCallConv(this.proc, LLVMCCallConv);
 
+        int i=0;
+        for (VarSymbol arg: args) {
+            arg.setExpr(LLVMGetParam(this.proc, i));
+            i++;
+        }
+
         appendBodyBlock();
 
         return this.proc;
@@ -105,15 +111,6 @@ public class ProcSymbol extends TypeSymbol {
                     s,
                     0);
         }
-
-
-
-        i=0;
-        for (VarSymbol arg: args) {
-            // arg.setExpr(LLVMGetParam(this.proc, i));
-            i++;
-        }
-
 
         return func_ref;
     }
