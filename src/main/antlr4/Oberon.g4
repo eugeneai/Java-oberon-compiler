@@ -195,7 +195,7 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type]
+term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type, Vector <ArthValue> exprs, ProcSymbol proc]
     :
     n=NUMBER {
              if ($n.text.contains(".")) {
@@ -214,22 +214,30 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
         }
         (
             LPAR
+                {
+                    $proc = $s.get($id.text);
+                    $exprs = new Vector<ArithValue>;
+                }
                 (
-                    expression
+                    fav=expression [$s]
+                    {
+                        $exprs.push_back($fav.value);
+                    }
                     (
                         COMMA
-                        expression
+                        nav=expression [$s]
+                        {
+                            $exprs.push_back($fav.value);
+                        }
                     )*
                 )?
             RPAR
+            {$exprs.size() == $proc.args.size()}?
+            // FIXME: Check types here or individually for each variable;
             {
-                // rocess parameters
-                ProcSymbol = $s.get($id.text);
+                // Process parameters
 
-                LLVMValueRef[] call_fac_args = { n_minus };
-                LLVMValueRef call_fac = LLVMBuildCall(builder, fac, new PointerPointer(call_fac_args), 1, "fac(n - 1)");
-
-                $value =
+                $value = $proc.genCall($exprs);
             }
         )?
     |   LPAR expression[$s] RPAR { $value = $expression.value; }

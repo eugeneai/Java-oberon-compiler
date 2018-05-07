@@ -1,6 +1,7 @@
 package org.isu.oberon;
 
 import org.bytedeco.javacpp.LLVM;
+import org.bytedeco.javacpp.PointerPointer;
 
 import java.util.Vector;
 
@@ -113,5 +114,22 @@ public class ProcSymbol extends TypeSymbol {
         }
 
         return func_ref;
+    }
+
+    public ArithValue genCall(Vector<ArithValue> exprs, Context c) {
+        int as = args.size();
+        int es = exprs.size();
+        assert as==es : String.format("ERROR: Procedure '%s' accepts %d parameters, but %d given", name, as, es);
+
+        LLVMValueRef[] call_fac_args = new LLVMValueRef[as];
+
+
+        int i;
+        for (i=0; i< as; i++) {
+
+        }
+
+        LLVMValueRef call_proc = LLVMBuildCall(c.builder, proc, new PointerPointer(call_fac_args), as, "");
+        return new ArithValue(type, call_proc);
     }
 }
