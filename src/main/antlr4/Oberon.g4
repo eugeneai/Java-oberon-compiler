@@ -25,7 +25,7 @@ module [OberonParser parser] returns [Context s]
 
             $s = new Context($parser, new ModuleSymbol($mid.text), builder);
 
-            ModuleSymbol mod = $s.addModule($mid.text);
+            ModuleSymbol mod = (ModuleSymbol) $s.proc;
             mod.setType($s.getType("@VOID@"));
             mod.createProc($s);
 
@@ -224,10 +224,15 @@ returnOp [Context s]:
    RETURN e=expression [$s]
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, "end");
-       LLVMPositionBuilderAtEnd($s.builder, end);
+       if ($s.proc.proc != null) {
+           LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, "end");
+           LLVMPositionBuilderAtEnd($s.builder, end);
 
-       LLVMBuildRet($s.builder, $e.value.ref);
+           LLVMBuildRet($s.builder, $e.value.ref);
+       } else {
+           System.err.println("ERROR: Null pointer!");
+           System.exit(1);
+       };
    }
    ;
 

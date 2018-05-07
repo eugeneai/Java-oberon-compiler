@@ -4,7 +4,7 @@ import org.bytedeco.javacpp.LLVM;
 
 import static org.bytedeco.javacpp.LLVM.LLVMModuleCreateWithName;
 
-public class ModuleSymbol extends ProcSymbol{
+public class ModuleSymbol extends ProcSymbol {
     public final LLVM.LLVMModuleRef mod;
     ModuleSymbol(String name) {
         super(name);

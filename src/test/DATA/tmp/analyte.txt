@@ -1,0 +1,57 @@
+Working Directory = /home/eugeneai/projects/oberon
+Added symbol: 'INTEGER':'org.isu.oberon.IntegerType'
+Added symbol: 'FLOAT':'org.isu.oberon.FloatType'
+Added symbol: '@VOID@':'org.isu.oberon.VoidType'
+
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMLinkInMCJIT ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMInitializeNativeAsmPrinter ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMInitializeNativeAsmParser ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMInitializeNativeDisassembler ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMInitializeNativeTarget ... JNI]
+
+
+
+Processing file: 'src/test/DATA/test_ex2.txt':
+
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMCreateBuilder ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMModuleCreateWithName ... JNI]
+
+Added symbol: 'testsimple':'org.isu.oberon.ModuleSymbol'
+
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMInt64Type ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMFunctionType ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMAddFunction ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMSetFunctionCallConv ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock ... JNI]
+
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMConstIntOfString ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMBuildMul ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMBuildAdd ... JNI]
+
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMPositionBuilderAtEnd ... JNI]
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMBuildRet ... JNI]
+
+
+-------------------- dump ------------
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMDumpModule ... JNI]
+
+; ModuleID = 'testsimple'
+source_filename = "testsimple"
+
+declare i64 @"@MAIN@"()
+
+-------------------- exec ------------
+[Dynamic-linking native method org.bytedeco.javacpp.LLVM.LLVMDisposeBuilder ... JNI]
+
+--------------------------------------
+Translation: [SUCCCESS]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.403 s
+[INFO] Finished at: 2018-05-07T10:35:09+08:00
+[Dynamic-linking native method java.lang.Runtime.gc ... JNI]
+[Dynamic-linking native method java.lang.Runtime.totalMemory ... JNI]
+[INFO] Final Memory: 16M/54M
+[INFO] ------------------------------------------------------------------------
+[Dynamic-linking native method java.lang.Shutdown.halt0 ... JNI]

@@ -52,14 +52,16 @@ public class ProcSymbol extends TypeSymbol {
 
     public LLVM.LLVMValueRef createProc(Context c) {
 
-        LLVM.LLVMValueRef proc = LLVMAddFunction(c.getModule().mod,
+        this.proc = LLVMAddFunction(c.getModule().mod,
                 tangle(name), genRef());
 
-        LLVMSetFunctionCallConv(proc, LLVMCCallConv);
+        assert this.proc!=null : "PROC is null!";
+
+        LLVMSetFunctionCallConv(this.proc, LLVMCCallConv);
 
         appendBodyBlock();
 
-        return proc;
+        return this.proc;
     }
 
     public String tangle(String name) {

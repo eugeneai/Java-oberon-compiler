@@ -32,11 +32,12 @@ public class Context {
     }
 
     public Context(org.isu.oberon.OberonParser parser,
-                   ProcSymbol proc,
+                   ModuleSymbol mod,
                    LLVMBuilderRef builder) {
         this.parser=parser;
-        this.proc=proc;
+        this.proc=mod;
         this.builder=builder;
+        this.addModule(mod);
     }
 
 
@@ -118,6 +119,9 @@ public class Context {
 
     public ModuleSymbol addModule(String name){
         return (ModuleSymbol) addSymbol(new ModuleSymbol(name));
+    }
+    public ModuleSymbol addModule(ModuleSymbol mod){
+        return (ModuleSymbol) addSymbol(mod);
     }
 
     public ProcSymbol addProc(String name, Vector<VarSymbol> args, TypeSymbol type){ // FIXE: Add parameters
