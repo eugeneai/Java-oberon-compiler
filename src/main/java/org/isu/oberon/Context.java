@@ -7,6 +7,8 @@ import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.LLVM.*;
 
 import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
+import static org.isu.oberon.OberonParser.DIV;
+import static org.isu.oberon.OberonParser.PLUS;
 
 
 public class Context {
@@ -165,10 +167,16 @@ public class Context {
         return symbols;
     }
 
-    public NumberType infixTypeCast(Value op1, Value op2) {
+    public NumberType infixTypeCast(Value op1, int op, Value op2, Context c) {
         NumberType t1 = (NumberType) op1.type;
         NumberType t2 = (NumberType) op2.type;
-        return t1; // FIXME: implement implicit casting.
+        FloatType fl = (FloatType) c.getType("FLOAT");
+        if (op == DIV) return fl; // FIXME: only for Int and Float and derivatives.
+        if (t1 == t2) return t1;
+        if (t1 == fl) return fl;
+        if (t2 == fl) return fl;
+        assert false : "Should not reach here";
+        return fl;
     }
 
     public Symbol get(String name) {

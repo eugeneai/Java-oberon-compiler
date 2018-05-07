@@ -166,7 +166,7 @@ expression [Context s] returns [Value value]
         op=pm
         e=expression[$s]
            {
-                NumberType type = $s.infixTypeCast($value, $e.value); // FIXME: returns typecast;
+                NumberType type = $s.infixTypeCast($value, $op.value, $e.value, $s); // FIXME: returns typecast;
                 $value = type.infixOp($s, $value, $op.value, $e.value);
            }
     )*
@@ -184,7 +184,7 @@ mult [Context s] returns [Value value]
         op=md
         m=mult[$s]
            {
-                NumberType type = $s.infixTypeCast($value, $m.value); // FIXME: returns typecast;
+                NumberType type = $s.infixTypeCast($value, $op.value, $m.value, $s); // FIXME: returns typecast;
                 $value = type.infixOp($s, $value, $op.value, $m.value);
            }
     )*
@@ -195,7 +195,7 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type, Vector <Value> exprs, ProcSymbol proc, boolean isProc]
+term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type, Vector <Value> exprs, ProcSymbol proc]
     :
     n=NUMBER {
              if ($n.text.contains(".")) {
@@ -210,12 +210,12 @@ term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type
     |   id=IDENT
         {
              // term-proc
-             $isProc = false;
+             $proc = null;
         }
         (
             LPAR
                 {
-                    $isProc = true;
+                    $proc = (ProcSymbol) $s.get($id.text);
                     $exprs = new Vector<Value>();
                 }
                 (
@@ -232,18 +232,15 @@ term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type
                     )*
                 )?
             RPAR
-            {$exprs.size() == $proc.args.size()}?
-            // FIXME: Check types here or individually for each variable;
-            {
-                // Process parameters
-                if ($isProc) {
-                    $proc = (ProcSymbol) $s.get($id.text);
-                    $value = $proc.genCall($exprs, $s);
-                } else {
-                   $value = $s.getRef($id.text);
-                }
-            }
         )?
+        {
+            // Process parameters
+            if ($proc != null) {
+               $value = $proc.genCall($exprs, $s);
+            } else {
+               $value = $s.getRef($id.text);
+            }
+        }
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 

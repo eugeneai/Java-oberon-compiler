@@ -1,0 +1,10 @@
+MODULE test_sqr;
+
+PROCEDURE sqr(n:INTEGER):INTEGER;
+BEGIN
+  RETURN n*n;
+END sqr;
+
+BEGIN
+  RETURN sqr(10);
+END test_sqr.

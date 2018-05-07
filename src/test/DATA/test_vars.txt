@@ -1,4 +1,4 @@
-MODULE test;
+MODULE test_vars;
 VAR
    i,j:INTEGER;
    k:INTEGER;
@@ -8,4 +8,4 @@ BEGIN
   i:=1 * 9 + 2 * 8;
   k:=7;
   RETURN j+i;
-END test.
+END test_vars.

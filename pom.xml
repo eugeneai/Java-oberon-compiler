@@ -60,7 +60,7 @@
                         <argument>src/test/DATA/test_ex2.txt</argument>
                         <argument>src/test/DATA/test_vars.txt</argument>
                         <argument>src/test/DATA/test_expr.txt</argument>
-                        <argument>src/test/DATA/test_fac.txt</argument>
+                        <argument>src/test/DATA/test_sqr.txt</argument>
                     </arguments>
                 </configuration>
             </plugin>
