@@ -1,0 +1,11 @@
+MODULE test;
+VAR
+   i,j:INTEGER;
+   k:INTEGER;
+
+BEGIN
+  j:=1;
+  i:=1 * 9 + 2 * 8;
+  k:=7;
+  RETURN j+i;
+END test.

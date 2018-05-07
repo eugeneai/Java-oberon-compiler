@@ -57,10 +57,11 @@
                     <!-- optional -->
                     <!-- <workingDirectory>/tmp</workingDirectory> -->
                     <arguments>
-                        <argument>src/test/DATA/test_ex2.txt</argument>
                         <!--
+                        <argument>src/test/DATA/test_ex2.txt</argument>
                         <argument>src/test/DATA/test_expr.txt</argument>
                         -->
+                        <argument>src/test/DATA/test_vars.txt</argument>
                     </arguments>
                 </configuration>
             </plugin>

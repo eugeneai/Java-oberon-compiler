@@ -18,7 +18,7 @@ public class IntegerType extends NumberType {
                 res = LLVMBuildSub(s.builder, arg1.ref, arg2.ref, "");
                 break;
             case org.isu.oberon.OberonParser.MUL:
-                res =  LLVMBuildMul(s.builder, arg1.ref, arg2.ref, "");
+                res = LLVMBuildMul(s.builder, arg1.ref, arg2.ref, "");
                 break;
             case org.isu.oberon.OberonParser.DIV:
                 res = LLVMBuildSDiv(s.builder, arg1.ref, arg2.ref, ""); // FIXME: Signed op.
@@ -33,7 +33,7 @@ public class IntegerType extends NumberType {
 
     @Override
     protected LLVMValueRef genConstant(Context c, String val) {
-        return LLVMConstIntOfString(LLVMInt64Type(),
+        return LLVMConstIntOfString(genRef(),
                 val, (byte) 10);
     }
 

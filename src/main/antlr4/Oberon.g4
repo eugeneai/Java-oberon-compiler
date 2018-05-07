@@ -201,7 +201,7 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
              } else {
                  $type = (IntegerType) $s.getType("INTEGER");
              };
-             $ref = $type.genConstant($s);
+             $ref = $type.genConstant($s, $n.text);
              $value = new ArithValue($type, $ref);
         }
     |   id=IDENT
