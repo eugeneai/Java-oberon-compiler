@@ -179,6 +179,13 @@ public class Context {
         if (parent!=null) {
             return parent.get(name);
         }
-        return types.get(name);
+        Symbol sym = types.get(name);
+
+        if (sym == null) {
+            System.err.println("ERROR: Symbol '"+name+"' not found");
+            System.exit(2);
+        }
+
+        return sym;
     }
 }

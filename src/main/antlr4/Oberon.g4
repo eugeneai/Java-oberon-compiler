@@ -212,6 +212,26 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
              // term-proc
              $value = $s.getRef($id.text);
         }
+        (
+            LPAR
+                (
+                    expression
+                    (
+                        COMMA
+                        expression
+                    )*
+                )?
+            RPAR
+            {
+                // rocess parameters
+                ProcSymbol = $s.get($id.text);
+
+                LLVMValueRef[] call_fac_args = { n_minus };
+                LLVMValueRef call_fac = LLVMBuildCall(builder, fac, new PointerPointer(call_fac_args), 1, "fac(n - 1)");
+
+                $value =
+            }
+        )?
     |   LPAR expression[$s] RPAR { $value = $expression.value; }
     ;
 
