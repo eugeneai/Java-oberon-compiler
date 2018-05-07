@@ -159,7 +159,7 @@ statement [Context s]:
    |
 ;
 
-expression [Context s] returns [ArithValue value]
+expression [Context s] returns [Value value]
     :
         m=mult[$s] { $value = $m.value; }
     (
@@ -177,7 +177,7 @@ pm returns [int value]
     |   MINUS { $value = $MINUS.type; }
     ;
 
-mult [Context s] returns [ArithValue value]
+mult [Context s] returns [Value value]
     :
         t=term[$s] { $value = $t.value; }
     (
@@ -195,7 +195,7 @@ md returns [int value]
     |   DIV { $value = $DIV.type; }
     ;
 
-term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType type, Vector <ArthValue> exprs, ProcSymbol proc]
+term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type, Vector <Value> exprs, ProcSymbol proc, boolean isProc]
     :
     n=NUMBER {
              if ($n.text.contains(".")) {
@@ -205,29 +205,29 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
              };
              $ref = $type.genConstant($s, $n.text);
              System.out.println(String.format("CONSTANT: (%s) = %s", $type.name, $n.text));
-             $value = new ArithValue($type, $ref);
+             $value = new Value($type, $ref);
         }
     |   id=IDENT
         {
              // term-proc
-             $value = $s.getRef($id.text);
+             $isProc = false;
         }
         (
             LPAR
                 {
-                    $proc = $s.get($id.text);
-                    $exprs = new Vector<ArithValue>;
+                    $isProc = true;
+                    $exprs = new Vector<Value>();
                 }
                 (
                     fav=expression [$s]
                     {
-                        $exprs.push_back($fav.value);
+                        $exprs.add($fav.value);
                     }
                     (
                         COMMA
                         nav=expression [$s]
                         {
-                            $exprs.push_back($fav.value);
+                            $exprs.add($nav.value);
                         }
                     )*
                 )?
@@ -236,8 +236,12 @@ term [Context s] returns [ArithValue value] locals [LLVMValueRef ref, NumberType
             // FIXME: Check types here or individually for each variable;
             {
                 // Process parameters
-
-                $value = $proc.genCall($exprs);
+                if ($isProc) {
+                    $proc = (ProcSymbol) $s.get($id.text);
+                    $value = $proc.genCall($exprs, $s);
+                } else {
+                   $value = $s.getRef($id.text);
+                }
             }
         )?
     |   LPAR expression[$s] RPAR { $value = $expression.value; }

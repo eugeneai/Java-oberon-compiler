@@ -116,7 +116,7 @@ public class ProcSymbol extends TypeSymbol {
         return func_ref;
     }
 
-    public ArithValue genCall(Vector<ArithValue> exprs, Context c) {
+    public Value genCall(Vector<Value> exprs, Context c) {
         int as = args.size();
         int es = exprs.size();
         assert as==es : String.format("ERROR: Procedure '%s' accepts %d parameters, but %d given", name, as, es);
@@ -125,11 +125,11 @@ public class ProcSymbol extends TypeSymbol {
 
 
         int i;
-        for (i=0; i< as; i++) {
-
+        for (i=0; i < as; i++) {
+            call_fac_args[i] = exprs.get(i).ref;
         }
 
         LLVMValueRef call_proc = LLVMBuildCall(c.builder, proc, new PointerPointer(call_fac_args), as, "");
-        return new ArithValue(type, call_proc);
+        return new Value(type, call_proc);
     }
 }

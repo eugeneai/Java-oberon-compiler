@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.javacpp.LLVM.*;
-import org.bytedeco.javacpp.Pointer;
 
 import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
 
@@ -63,9 +62,9 @@ public class Context {
         var.setExpr(expr);
     }
 
-    public ArithValue getRef(String name) {
+    public Value getRef(String name) {
         VarSymbol var = (VarSymbol) getCurrent().get(name);
-        ArithValue val = new ArithValue((NumberType) var.type, var.ref);
+        Value val = new Value((NumberType) var.type, var.ref);
         return val;
     }
 
@@ -166,9 +165,9 @@ public class Context {
         return symbols;
     }
 
-    public NumberType infixTypeCast(ArithValue op1, ArithValue op2) {
-        NumberType t1 = op1.type;
-        NumberType t2 = op2.type;
+    public NumberType infixTypeCast(Value op1, Value op2) {
+        NumberType t1 = (NumberType) op1.type;
+        NumberType t2 = (NumberType) op2.type;
         return t1; // FIXME: implement implicit casting.
     }
 

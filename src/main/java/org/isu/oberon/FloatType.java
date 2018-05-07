@@ -10,7 +10,7 @@ public class FloatType extends NumberType {
     }
 
     @Override
-    public ArithValue infixOp(Context s, ArithValue arg1, int op, ArithValue arg2) {
+    public Value infixOp(Context s, Value arg1, int op, Value arg2) {
         LLVMValueRef res;
         switch (op) {
             case org.isu.oberon.OberonParser.PLUS:
@@ -30,7 +30,7 @@ public class FloatType extends NumberType {
                 System.exit(1);
                 return null;
         }
-        return new ArithValue(this, res); // Should not get here
+        return new Value(this, res); // Should not get here
     }
 
     @Override

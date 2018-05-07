@@ -7,7 +7,7 @@ public class IntegerType extends NumberType {
         super("INTEGER");
     }
 
-    public ArithValue infixOp(Context s, ArithValue arg1, int op, ArithValue arg2)
+    public Value infixOp(Context s, Value arg1, int op, Value arg2)
     {
         LLVMValueRef res;
         switch (op) {
@@ -28,7 +28,7 @@ public class IntegerType extends NumberType {
                 System.exit(1);
                 return null;
         }
-        return new ArithValue(this, res); // Should not get here
+        return new Value(this, res); // Should not get here
     }
 
     @Override
