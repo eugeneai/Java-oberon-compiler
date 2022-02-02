@@ -7,7 +7,7 @@ https://www.inf.ethz.ch/personal/wirth/Oberon/Oberon07.Report.pdf
 
 ## Исходный код Java-класса обрамления библиотеки LLVM
 
-https://github.com/bytedeco/javacpp-presets/blob/master/llvm/src/main/java/org/bytedeco/javacpp/LLVM.java
+https://github.com/bytedeco/javacpp-presets/tree/master/llvm
 
 ## Установка программного обеспечения
 
