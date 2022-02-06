@@ -1,6 +1,6 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.LLVM;
+import org.bytedeco.llvm.LLVM.LLVMValueRef;
 
 
 public abstract class NumberType extends TypeSymbol {
@@ -13,7 +13,7 @@ public abstract class NumberType extends TypeSymbol {
                                   Value arg2);
 
     @Override
-    protected LLVM.LLVMValueRef genConstant(Context c) {
+    protected LLVMValueRef genConstant(Context c) {
         return genConstant(c,"0");
     }
 }

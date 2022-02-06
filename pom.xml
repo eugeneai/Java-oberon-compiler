@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.7.1</version>
+            <version>4.9.3</version>
         </dependency>
         <!-- https://github.com/bytedeco/javacpp-presets/tree/master/llvm -->
         <dependency>
@@ -37,7 +37,7 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.7.1</version>
+                <version>4.9.3</version>
                 <executions>
                     <execution>
                         <id>antlr</id>
