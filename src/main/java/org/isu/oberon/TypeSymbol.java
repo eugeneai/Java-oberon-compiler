@@ -1,6 +1,6 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.global.LLVM;
+import org.bytedeco.llvm.LLVM.*;
 
 public abstract class TypeSymbol extends Symbol {
     public TypeSymbol parent;
@@ -20,14 +20,14 @@ public abstract class TypeSymbol extends Symbol {
         return true;
     }
 
-    public LLVM.LLVMValueRef genDefaultValueRef(VarSymbol var, Context c) {
+    public LLVMValueRef genDefaultValueRef(VarSymbol var, Context c) {
         return genConstant(c);
     }
 
-    protected abstract LLVM.LLVMValueRef genConstant(Context c, String value);
+    protected abstract LLVMValueRef genConstant(Context c, String value);
 
-    protected abstract LLVM.LLVMValueRef genConstant(Context c);
+    protected abstract LLVMValueRef genConstant(Context c);
 
-    protected abstract LLVM.LLVMTypeRef genRef();
+    protected abstract LLVMTypeRef genRef();
 
 }

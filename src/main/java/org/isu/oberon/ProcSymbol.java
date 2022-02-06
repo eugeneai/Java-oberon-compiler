@@ -1,22 +1,23 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.LLVM;
-import org.bytedeco.llvm.PointerPointer;
+
+import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.llvm.LLVM.*;
 
 import java.util.Vector;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
 public class ProcSymbol extends TypeSymbol {
-    public LLVM.LLVMValueRef proc = null;
+    public LLVMValueRef proc = null;
     public Vector<VarSymbol> args = null;
-    public LLVM.LLVMBasicBlockRef body = null;
+    public LLVMBasicBlockRef body = null;
     public TypeSymbol type = null;
 
     public ProcSymbol(String name,
                       Vector<VarSymbol> args,
                       TypeSymbol type,
-                      LLVM.LLVMValueRef proc) {  // FIXME: Add parameters
+                      LLVMValueRef proc) {  // FIXME: Add parameters
         super(name);
         this.args = args;
         this.type = type;
@@ -51,7 +52,7 @@ public class ProcSymbol extends TypeSymbol {
         return false;
     }
 
-    public LLVM.LLVMValueRef createProc(Context c) {
+    public LLVMValueRef createProc(Context c) {
 
         this.proc = LLVMAddFunction(c.getModule().mod,
                 tangle(name), genRef());
@@ -89,7 +90,7 @@ public class ProcSymbol extends TypeSymbol {
     protected LLVMTypeRef genRef() {
 
         int s = args.size();
-        LLVM.LLVMTypeRef [] fac_arg = new LLVMTypeRef[s];
+        LLVMTypeRef [] fac_arg = new LLVMTypeRef[s];
 
         int i=0;
         for (VarSymbol arg: args) {

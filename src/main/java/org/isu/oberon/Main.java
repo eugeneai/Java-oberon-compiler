@@ -3,8 +3,8 @@ package org.isu.oberon;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.bytedeco.llvm.BytePointer;
-import org.bytedeco.llvm.Pointer;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
 
 import java.io.IOException;
 

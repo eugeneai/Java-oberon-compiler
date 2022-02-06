@@ -5,8 +5,8 @@ package org.isu.oberon;
 
 // import java.util.HashMap;
 import java.util.Vector;
-import org.bytedeco.javacpp.*;
-import static org.bytedeco.javacpp.LLVM.*;
+import static org.bytedeco.llvm.global.LLVM.*;
+import org.bytedeco.llvm.LLVM.*;
 }
 
 /*  MODULE ident ";" [ImportList] DeclarationSequence

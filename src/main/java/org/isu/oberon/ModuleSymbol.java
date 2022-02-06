@@ -1,11 +1,11 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.LLVM;
+import org.bytedeco.llvm.LLVM.LLVMModuleRef;
 
-import static org.bytedeco.javacpp.llvm.LLVMModuleCreateWithName;
+import static org.bytedeco.llvm.global.LLVM.LLVMModuleCreateWithName;
 
 public class ModuleSymbol extends ProcSymbol {
-    public final LLVM.LLVMModuleRef mod;
+    public final LLVMModuleRef mod;
     ModuleSymbol(String name) {
         super(name);
         mod = LLVMModuleCreateWithName(name);

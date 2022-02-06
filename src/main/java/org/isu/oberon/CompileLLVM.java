@@ -1,6 +1,10 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.*;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.llvm.LLVM.*;
+
 import static org.bytedeco.llvm.global.LLVM.*;
 
 public class CompileLLVM {
@@ -57,7 +61,7 @@ public class CompileLLVM {
         }
 
         LLVMPassManagerRef pass = LLVMCreatePassManager();
-        LLVMAddConstantPropagationPass(pass);
+        // LLVMAddConstantPropagationPass(pass);
         LLVMAddInstructionCombiningPass(pass);
         LLVMAddPromoteMemoryToRegisterPass(pass);
         // LLVMAddDemoteMemoryToRegisterPass(pass); // Demotes every possible value to memory

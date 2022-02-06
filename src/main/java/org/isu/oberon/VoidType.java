@@ -1,8 +1,8 @@
 package org.isu.oberon;
 
-import org.bytedeco.llvm.LLVM;
+import org.bytedeco.llvm.LLVM.*;
 
-import static org.bytedeco.llvm.global.LLVMInt64Type;
+import static org.bytedeco.llvm.global.LLVM.LLVMInt64Type;
 
 public class VoidType extends TypeSymbol {
     public VoidType() {
@@ -10,19 +10,19 @@ public class VoidType extends TypeSymbol {
     }
 
     @Override
-    protected LLVM.LLVMValueRef genConstant(Context c) {
+    protected LLVMValueRef genConstant(Context c) {
         return genConstant(c,"");
     }
 
     @Override
-    protected LLVM.LLVMValueRef genConstant(Context c, String value) {
+    protected LLVMValueRef genConstant(Context c, String value) {
         // FIXME: issue an exception on using void type value.
         System.err.println("WARNING: usage of void type reference");
         return null;
     }
 
     @Override
-    protected LLVM.LLVMTypeRef genRef() {
+    protected LLVMTypeRef genRef() {
         return LLVMInt64Type();
     }
 }
