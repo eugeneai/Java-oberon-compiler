@@ -1,8 +1,8 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.LLVM;
+import org.bytedeco.llvm.LLVM;
 
-import static org.bytedeco.javacpp.LLVM.LLVMGetParam;
+import static org.bytedeco.llvm.LLVM.LLVMGetParam;
 
 public abstract class TypeSymbol extends Symbol {
     public TypeSymbol parent;

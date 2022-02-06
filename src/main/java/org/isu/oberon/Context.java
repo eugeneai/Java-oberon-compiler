@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import org.antlr.v4.runtime.FailedPredicateException;
-import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.llvm.LLVM.*;
 
-import static org.bytedeco.javacpp.LLVM.LLVMAppendBasicBlock;
+import static org.bytedeco.llvm.LLVM.LLVMAppendBasicBlock;
 import static org.isu.oberon.OberonParser.DIV;
 import static org.isu.oberon.OberonParser.PLUS;
 

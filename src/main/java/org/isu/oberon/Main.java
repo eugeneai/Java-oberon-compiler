@@ -3,12 +3,12 @@ package org.isu.oberon;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.llvm.BytePointer;
+import org.bytedeco.llvm.Pointer;
 
 import java.io.IOException;
 
-import static org.bytedeco.javacpp.LLVM.*;
+import static org.bytedeco.llvm.global.LLVM.*;
 
 public class Main {
     public static void main(String[] args ) {

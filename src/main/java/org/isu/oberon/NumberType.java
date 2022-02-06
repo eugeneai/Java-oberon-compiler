@@ -1,6 +1,7 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.LLVM;
+import org.bytedeco.llvm.LLVM;
+
 
 public abstract class NumberType extends TypeSymbol {
     public NumberType(String name) {

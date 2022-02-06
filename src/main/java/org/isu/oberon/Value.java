@@ -1,6 +1,6 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.LLVM;
+import org.bytedeco.llvm.LLVM;
 
 public class Value {
 

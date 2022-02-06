@@ -1,8 +1,8 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.llvm.LLVM.*;
 
-import static org.bytedeco.javacpp.LLVM.*;
+import static org.bytedeco.llvm.global.LLVM.*;
 
 public class FloatType extends NumberType {
     public FloatType() {

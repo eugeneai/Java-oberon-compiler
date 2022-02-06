@@ -1,11 +1,11 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.LLVM;
-import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.llvm.LLVM;
+import org.bytedeco.llvm.PointerPointer;
 
 import java.util.Vector;
 
-import static org.bytedeco.javacpp.LLVM.*;
+import static org.bytedeco.llvm.global.LLVM.*;
 
 public class ProcSymbol extends TypeSymbol {
     public LLVM.LLVMValueRef proc = null;

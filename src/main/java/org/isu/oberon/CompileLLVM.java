@@ -1,7 +1,7 @@
 package org.isu.oberon;
 
-import org.bytedeco.javacpp.*;
-import static org.bytedeco.javacpp.LLVM.*;
+import org.bytedeco.llvm.*;
+import static org.bytedeco.llvm.global.LLVM.*;
 
 public class CompileLLVM {
     public static void Test () {
