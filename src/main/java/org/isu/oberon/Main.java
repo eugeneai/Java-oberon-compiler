@@ -73,7 +73,7 @@ public class Main {
 
 
                 System.out.println("\n--------------------------------------");
-                System.out.println("Translation: [SUCCCESS]");
+                System.out.println("Translation: [SUCCESS]");
             } catch (IOException e) {
                 System.out.println("[FAILURE]");
                 e.printStackTrace();
