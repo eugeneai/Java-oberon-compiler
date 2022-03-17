@@ -159,6 +159,14 @@ statement [Context s]:
    |
 ;
 
+logicalOp:
+    EQOP
+    ;
+
+logicalExpression [Context s] returns [Value value]:
+    e1=expression[$s] logicalOp e2=expression[$s]
+    ;
+
 expression [Context s] returns [Value value]
     :
         m=mult[$s] { $value = $m.value; }
@@ -253,6 +261,12 @@ assignment [Context s]:
    }
    ;
 
+ifOp [Context s]:
+   IF e=logicalExpression[$s]
+   THEN statementSequence[$s]
+   ( ELSE statementSequence[$s] )?
+   ;
+
 returnOp [Context s]:
    RETURN e=expression [$s]
    {
@@ -279,6 +293,9 @@ END   : 'END'   ;
 MODULE: 'MODULE';
 VAR   : 'VAR'   ;
 RETURN: 'RETURN';
+IF    : 'IF'    ;
+THEN  : 'THEN'  ;
+ELSE  : 'ELSE'  ;
 
 PROCEDURE: 'PROCEDURE';
 
@@ -296,6 +313,11 @@ DOT  : '.' ;
 SEMI : ';' ;
 COLON: ':' ;
 COMMA: ',' ;
+
+LEOP : '<=' ;
+GEOP : '>=' ;
+EQOP : '==' ;
+
 
 ASSIGN: ':=';
 

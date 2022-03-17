@@ -8,6 +8,17 @@ BEGIN
   RETURN q;
 END a ;
 
+PROCEDURE fact(n:INTEGER):INTEGER;
+BEGIN
+  IF n=0 THEN RETURN 1 END;
+  IF n=1 THEN
+      RETURN 1
+  ELSE
+      RETURN fact(n-1)*n
+  END;
+END fact ;
+
+
 BEGIN
   j:=1;
   i:=1 * 9 + 2 * 8;
