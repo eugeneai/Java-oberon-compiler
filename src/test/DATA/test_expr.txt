@@ -10,14 +10,8 @@ END a ;
 
 PROCEDURE fact(n:INTEGER):INTEGER;
 BEGIN
-  IF n=0 THEN RETURN 1 END;
-  IF n=1 THEN
-      RETURN 1
-  ELSE
-      RETURN fact(n-1)*n
-  END;
+  IF FALSE THEN RETURN 20 END;
 END fact ;
-
 
 BEGIN
   j:=1;

@@ -40,10 +40,10 @@ module [OberonParser parser] returns [Context s]
     ;
 
 block [Context s]:
-    (
-     BEGIN
-     statementSequence [$s]
-    ) ?
+    BEGIN
+     (
+       statementSequence [$s]
+     ) ?
     END
     ;
 
@@ -95,11 +95,7 @@ procedureDeclaration [Context c]
    :
       h=procedureHeading [$c]
       SEMI
-      procedureBody [$h.fc] // FIXME:fc
-      eid=IDENT
-      {
-         $h.name.equals($eid.text)
-      }?
+      procedureBody [$h.fc, $h.name] // FIXME:fc
    ;
 
 procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbol retType]:
@@ -141,8 +137,12 @@ procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbo
    }
    ;
 
-procedureBody [Context c]:
+procedureBody [Context c, String name]:
    block [$c]
+   eid=IDENT
+      {
+         $name.equals($eid.text)
+      }?
    ;
 
 statementSequence  [Context s]:
@@ -156,6 +156,7 @@ statementSequence  [Context s]:
 statement [Context s]:
      assignment [$s]
    | returnOp [$s]
+   | ifOp [$s]
    |
 ;
 
@@ -163,7 +164,17 @@ logicalOp:
     EQOP
     ;
 
-logicalExpression [Context s] returns [Value value]:
+logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, BooleanType type]:
+    TRUE {
+           $type = (BooleanType) $s.getType("BOOLEAN");
+           $value = new Value($type, $type.genConstant($s, "TRUE"));
+         }
+    |
+    FALSE {
+           $type = (BooleanType) $s.getType("BOOLEAN");
+           $value = new Value($type, $type.genConstant($s, "FALSE"));
+          }
+    |
     e1=expression[$s] logicalOp e2=expression[$s]
     ;
 
@@ -264,7 +275,9 @@ assignment [Context s]:
 ifOp [Context s]:
    IF e=logicalExpression[$s]
    THEN statementSequence[$s]
+   ( ELSIF ee=logicalExpression[$s] THEN statementSequence[$s] )*
    ( ELSE statementSequence[$s] )?
+   END
    ;
 
 returnOp [Context s]:
@@ -296,6 +309,9 @@ RETURN: 'RETURN';
 IF    : 'IF'    ;
 THEN  : 'THEN'  ;
 ELSE  : 'ELSE'  ;
+ELSIF : 'ELSIF' ;
+TRUE  : 'TRUE'  ;
+FALSE : 'FALSE' ;
 
 PROCEDURE: 'PROCEDURE';
 
@@ -316,7 +332,7 @@ COMMA: ',' ;
 
 LEOP : '<=' ;
 GEOP : '>=' ;
-EQOP : '==' ;
+EQOP : '=' ;
 
 
 ASSIGN: ':=';
