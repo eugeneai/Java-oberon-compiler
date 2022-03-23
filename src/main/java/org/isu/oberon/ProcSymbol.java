@@ -10,7 +10,7 @@ import static org.bytedeco.llvm.global.LLVM.*;
 
 public class ProcSymbol extends TypeSymbol {
     public LLVMValueRef proc = null;
-    public Vector<VarSymbol> args = null;
+    public Vector<VarSymbol> args;
     public LLVMBasicBlockRef body = null;
     public TypeSymbol type = null;
 
@@ -52,7 +52,7 @@ public class ProcSymbol extends TypeSymbol {
         return false;
     }
 
-    public LLVMValueRef createProc(Context c) {
+    public void createProc(Context c) {
 
         this.proc = LLVMAddFunction(c.getModule().mod,
                 tangle(name), genRef());
@@ -68,8 +68,8 @@ public class ProcSymbol extends TypeSymbol {
         }
 
         appendBodyBlock();
+        LLVMPositionBuilderAtEnd(c.builder, body);
 
-        return this.proc;
     }
 
     public String tangle(String name) {
@@ -98,7 +98,7 @@ public class ProcSymbol extends TypeSymbol {
             i++;
         }
 
-        LLVMTypeRef func_ref=null;
+        LLVMTypeRef func_ref;
 
         if (s>0) {
             func_ref = LLVMFunctionType(type.genRef(),

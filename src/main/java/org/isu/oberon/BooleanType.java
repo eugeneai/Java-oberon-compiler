@@ -2,6 +2,7 @@ package org.isu.oberon;
 
 import org.bytedeco.llvm.LLVM.LLVMTypeRef;
 import org.bytedeco.llvm.LLVM.LLVMValueRef;
+import org.bytedeco.llvm.global.LLVM;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
@@ -15,7 +16,7 @@ public class BooleanType extends NumberType {
         LLVMValueRef res;
         switch (op) {
             case org.isu.oberon.OberonParser.EQOP:
-                res = LLVMBuildAdd(s.builder, arg1.ref, arg2.ref, "");
+                res = LLVMBuildICmp(s.builder, LLVM.LLVMIntEQ , arg1.ref, arg2.ref, "test_equ");
                 break;
             default:
                 System.out.println("Wrong BOOLEAN equation operation!");
