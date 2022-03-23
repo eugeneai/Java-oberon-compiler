@@ -40,10 +40,10 @@ module [OberonParser parser] returns [Context s]
     ;
 
 block [Context s]:
-    (
-     BEGIN
-     statementSequence [$s]
-    ) ?
+    BEGIN
+     (
+       statementSequence [$s]
+     ) ?
     END
     ;
 
@@ -95,11 +95,7 @@ procedureDeclaration [Context c]
    :
       h=procedureHeading [$c]
       SEMI
-      procedureBody [$h.fc] // FIXME:fc
-      eid=IDENT
-      {
-         $h.name.equals($eid.text)
-      }?
+      procedureBody [$h.fc, $h.name] // FIXME:fc
    ;
 
 procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbol retType]:
@@ -141,8 +137,12 @@ procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbo
    }
    ;
 
-procedureBody [Context c]:
+procedureBody [Context c, String name]:
    block [$c]
+   eid=IDENT
+      {
+         $name.equals($eid.text)
+      }?
    ;
 
 statementSequence  [Context s]:
@@ -156,15 +156,30 @@ statementSequence  [Context s]:
 statement [Context s]:
      assignment [$s]
    | returnOp [$s]
+   | ifOp [$s]
    |
 ;
 
-logicalOp:
-    EQOP
+logicalOp returns [int value]:
+    EQOP { $value = $EQOP.type; }
     ;
 
-logicalExpression [Context s] returns [Value value]:
-    e1=expression[$s] logicalOp e2=expression[$s]
+logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, BooleanType type]:
+    TRUE {
+           $type = (BooleanType) $s.getType("BOOLEAN");
+           $value = new Value($type, $type.genConstant($s, "TRUE"));
+         }
+    |
+    FALSE {
+           $type = (BooleanType) $s.getType("BOOLEAN");
+           $value = new Value($type, $type.genConstant($s, "FALSE"));
+          }
+    |
+    e1=expression[$s] op=logicalOp e2=expression[$s]
+         {
+            $type = (BooleanType) $s.getType("BOOLEAN");
+            $value = $type.infixOp($s, $e1.value, $op.value, $e2.value);
+         }
     ;
 
 expression [Context s] returns [Value value]
@@ -261,10 +276,68 @@ assignment [Context s]:
    }
    ;
 
-ifOp [Context s]:
+ifOp [Context s] locals [LLVMBasicBlockRef elsif_block, boolean else_happened ]:
    IF e=logicalExpression[$s]
-   THEN statementSequence[$s]
-   ( ELSE statementSequence[$s] )?
+     {
+       $else_happened=false;
+       LLVMBasicBlockRef then_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_then");
+       $elsif_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_elsif");
+       LLVMBasicBlockRef join_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_join");
+       // TODO: CHECK CMP or TRUTH value
+       LLVMBuildCondBr($s.builder,$e.value.ref,then_block,$elsif_block);
+     }
+   THEN
+     {
+       LLVMPositionBuilderAtEnd($s.builder, then_block);
+     }
+   statementSequence[$s]
+     {
+       LLVMBuildBr($s.builder, join_block);
+     }
+   ( ELSIF
+    {
+       LLVMPositionBuilderAtEnd($s.builder, $elsif_block);
+       LLVMBasicBlockRef elsif_then_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_elsif_then");
+       $elsif_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_elsif_next");
+    }
+    ee=logicalExpression[$s]
+     {
+       LLVMBuildCondBr($s.builder,$e.value.ref,elsif_then_block,$elsif_block);
+     }
+     THEN
+     {
+       LLVMPositionBuilderAtEnd($s.builder, elsif_then_block);
+     }
+     statementSequence[$s]
+     {
+       LLVMBuildBr($s.builder, join_block);
+       LLVMPositionBuilderAtEnd($s.builder, $elsif_block); // Empty one
+       LLVMBuildBr($s.builder, join_block);
+     }
+   )*
+   (
+     ELSE
+     {
+       $else_happened=true;
+       LLVMPositionBuilderAtEnd($s.builder, $elsif_block);
+     }
+     statementSequence[$s]
+     {
+       LLVMBuildBr($s.builder, join_block);
+     }
+   )?
+   END
+   {
+     // Phi
+     if ($else_happened==false) {
+       LLVMPositionBuilderAtEnd($s.builder, $elsif_block);
+       LLVMBuildBr($s.builder, join_block);
+     }
+     LLVMPositionBuilderAtEnd($s.builder, join_block);
+     LLVMBasicBlockRef end_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_if_end");
+     LLVMBuildBr($s.builder, end_block);
+     LLVMPositionBuilderAtEnd($s.builder, end_block);
+   }
    ;
 
 returnOp [Context s]:
@@ -272,15 +345,16 @@ returnOp [Context s]:
    {
        // FIXME: Block "end" migt be useful for Exceptions and Exits.
 
-       System.out.println("RETURN: from "+$s.proc.name);
+       // System.out.println("RETURN: from "+$s.proc.name);
 
        assert $s.proc.proc != null : "ERROR: Null pointer!";
 
-       LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_end");
-       LLVMPositionBuilderAtEnd($s.builder, end);
+       // LLVMBasicBlockRef end = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_end");
+       // LLVMPositionBuilderAtEnd($s.builder, end);
+
        LLVMBuildRet($s.builder, $e.value.ref);
 
-       System.out.println("RETURN END: "+$s.proc.name);
+       // System.out.println("RETURN END: "+$s.proc.name);
    }
    ;
 
@@ -296,12 +370,16 @@ RETURN: 'RETURN';
 IF    : 'IF'    ;
 THEN  : 'THEN'  ;
 ELSE  : 'ELSE'  ;
+ELSIF : 'ELSIF' ;
+TRUE  : 'TRUE'  ;
+FALSE : 'FALSE' ;
 
 PROCEDURE: 'PROCEDURE';
 
 fragment NUM : [0-9]+ ;
 
-NUMBER   : '-'?(NUM | NUM?[.]NUM([Ee]NUM)?);
+// NUMBER   : (NUM | NUM?[.]NUM([Ee]NUM)?);
+NUMBER   : (NUM);
 
 PLUS : '+' ;
 MINUS: '-' ;
@@ -316,7 +394,7 @@ COMMA: ',' ;
 
 LEOP : '<=' ;
 GEOP : '>=' ;
-EQOP : '==' ;
+EQOP : '=' ;
 
 
 ASSIGN: ':=';

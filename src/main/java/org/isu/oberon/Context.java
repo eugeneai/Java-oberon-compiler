@@ -64,20 +64,18 @@ public class Context {
 
     public Value getRef(String name) {
         VarSymbol var = (VarSymbol) getCurrent().get(name);
-        Value val = new Value((NumberType) var.type, var.ref);
-        return val;
+        return new Value(var.type, var.ref);
     }
 
-    public boolean IdDoesNotExist(String name) throws FailedPredicateException {
+    public void IdDoesNotExist(String name) throws FailedPredicateException {
         if (getCurrent().containsKey(name)) {
             throw new FailedPredicateException(parser,
                     "symbol-exists-already",
                     String.format("The '%s' identifier is already defined", name));
         }
-        return true;
     }
 
-    public boolean IdExists(String name) throws FailedPredicateException {
+    public void IdExists(String name) throws FailedPredicateException {
         if (! getCurrent().containsKey(name)) {
             String msg = String.format("Identifier '%s' is not defined", name);
             System.err.println(msg);
@@ -85,7 +83,6 @@ public class Context {
                     "symbol-does-not-exist",
                     msg);
         }
-        return true;
     }
 
     public VarSymbol addVariable(String name, String typeName, int index) throws FailedPredicateException {
@@ -119,8 +116,8 @@ public class Context {
     public ModuleSymbol addModule(String name){
         return (ModuleSymbol) addSymbol(new ModuleSymbol(name));
     }
-    public ModuleSymbol addModule(ModuleSymbol mod){
-        return (ModuleSymbol) addSymbol(mod);
+    public void addModule(ModuleSymbol mod){
+        addSymbol(mod);
     }
 
     public ProcSymbol addProc(String name, Vector<VarSymbol> args, TypeSymbol type){ // FIXE: Add parameters
@@ -141,8 +138,8 @@ public class Context {
     }
 
     private static Symbol addSymbol(HashMap<String,Symbol> table, Symbol sym) {
-        System.out.println(String.format("Added symbol: '%s':'%s'",
-                sym.name, sym.getClass().getName()));
+        System.out.printf("Added symbol: '%s':'%s'%n",
+                sym.name, sym.getClass().getName());
         table.put(sym.name, sym);
         return sym;
     }
@@ -154,10 +151,11 @@ public class Context {
     public static void initializeTypeTable() {
         if (types == null) {
             types = new HashMap<>();
-        };
+        }
         addSymbol(types, new IntegerType());
         addSymbol(types, new FloatType());
         addSymbol(types, new VoidType());
+        addSymbol(types, new BooleanType());
         // FIXME: add other basic types: REAL, FLOAT, CARDINAL, STRING, CHAR
     }
 
@@ -180,7 +178,7 @@ public class Context {
     public Symbol get(String name) {
         if (symbols.containsKey(name)) {
             return symbols.get(name);
-        };
+        }
         if (parent!=null) {
             return parent.get(name);
         }
