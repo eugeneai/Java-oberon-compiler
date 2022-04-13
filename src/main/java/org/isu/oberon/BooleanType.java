@@ -3,10 +3,14 @@ package org.isu.oberon;
 import org.bytedeco.llvm.LLVM.LLVMTypeRef;
 import org.bytedeco.llvm.LLVM.LLVMValueRef;
 import org.bytedeco.llvm.global.LLVM;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
 public class BooleanType extends NumberType {
+    private static final Logger logger = LoggerFactory.getLogger(BooleanType.class);
+
     BooleanType(){
         super("BOOLEAN");
     }
@@ -16,10 +20,25 @@ public class BooleanType extends NumberType {
         LLVMValueRef res;
         switch (op) {
             case org.isu.oberon.OberonParser.EQOP:
-                res = LLVMBuildICmp(s.builder, LLVM.LLVMIntEQ , arg1.ref, arg2.ref, "test_equ");
+                res = LLVMBuildICmp(s.builder, LLVMIntEQ , arg1.ref, arg2.ref, "test_equ");
+                break;
+            case org.isu.oberon.OberonParser.LEOP:
+                res = LLVMBuildICmp(s.builder, LLVMIntSLE , arg1.ref, arg2.ref, "test_sle");
+                break;
+            case org.isu.oberon.OberonParser.GEOP:
+                res = LLVMBuildICmp(s.builder, LLVMIntSGE , arg1.ref, arg2.ref, "test_uge");
+                break;
+            case org.isu.oberon.OberonParser.NQOP:
+                res = LLVMBuildICmp(s.builder, LLVMIntNE , arg1.ref, arg2.ref, "test_neq");
+                break;
+            case org.isu.oberon.OberonParser.LTOP:
+                res = LLVMBuildICmp(s.builder, LLVMIntSLT , arg1.ref, arg2.ref, "test_neq");
+                break;
+            case org.isu.oberon.OberonParser.GTOP:
+                res = LLVMBuildICmp(s.builder, LLVMIntSGT , arg1.ref, arg2.ref, "test_neq");
                 break;
             default:
-                System.out.println("Wrong BOOLEAN equation operation!");
+                logger.error("Wrong BOOLEAN equation operation");
                 System.exit(1);
                 return null;
         }
@@ -33,7 +52,7 @@ public class BooleanType extends NumberType {
         } else if (val.equals("FALSE")) {
             return LLVMConstInt(genRef(), 0, 0);
         } else {
-            System.out.println("Wrong BOOLEAN contatnt");
+            logger.error("Wrong BOOLEAN constant");
             System.exit(1);
             return null;
         }
