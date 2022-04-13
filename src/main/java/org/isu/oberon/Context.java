@@ -5,11 +5,14 @@ import java.util.Vector;
 
 import org.antlr.v4.runtime.FailedPredicateException;
 import org.bytedeco.llvm.LLVM.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.isu.oberon.OberonParser.DIV;
 
 
 public class Context {
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
 
     public Context parent = null;
     public ProcSymbol proc;
@@ -78,7 +81,7 @@ public class Context {
     public void IdExists(String name) throws FailedPredicateException {
         if (! getCurrent().containsKey(name)) {
             String msg = String.format("Identifier '%s' is not defined", name);
-            System.err.println(msg);
+            logger.error(msg);
             throw new FailedPredicateException(parser,
                     "symbol-does-not-exist",
                     msg);
@@ -138,8 +141,7 @@ public class Context {
     }
 
     private static Symbol addSymbol(HashMap<String,Symbol> table, Symbol sym) {
-        System.out.printf("Added symbol: '%s':'%s'%n",
-                sym.name, sym.getClass().getName());
+        logger.info("Added symbol: '{}':'{}'", sym.name, sym.getClass().getName());
         table.put(sym.name, sym);
         return sym;
     }
@@ -185,7 +187,7 @@ public class Context {
         Symbol sym = types.get(name);
 
         if (sym == null) {
-            System.err.println("ERROR: Symbol '"+name+"' not found");
+            logger.error("Symbol '{}' not found", name);
             System.exit(2);
         }
 

@@ -157,11 +157,23 @@ statement [Context s]:
      assignment [$s]
    | returnOp [$s]
    | ifOp [$s]
+   | whileOp [$s]
    |
 ;
 
 logicalOp returns [int value]:
     EQOP { $value = $EQOP.type; }
+    |
+    LEOP { $value = $LEOP.type; }
+    |
+    GEOP { $value = $GEOP.type; }
+    |
+    NQOP { $value = $NQOP.type; }
+    |
+    LTOP { $value = $LTOP.type; }
+    |
+    GTOP { $value = $GTOP.type; }
+    |
     ;
 
 logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, BooleanType type]:
@@ -340,6 +352,34 @@ ifOp [Context s] locals [LLVMBasicBlockRef elsif_block, boolean else_happened ]:
    }
    ;
 
+whileOp [Context s]:
+    {
+        LLVMBasicBlockRef head_experssion = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_while_head");
+        LLVMBasicBlockRef do_while = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_while");
+        LLVMBasicBlockRef exit_while = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_while");
+    }
+    WHILE
+    {
+        LLVMPositionBuilderAtEnd($s.builder, head_experssion);
+    }
+    e=logicalExpression[$s]
+    {
+        LLVMBuildCondBr($s.builder,$e.value.ref,do_while,exit_while);
+    }
+    DO
+    {
+        LLVMPositionBuilderAtEnd($s.builder, do_while);
+    }
+    statementSequence[$s]
+    {
+        LLVMBuildBr($s.builder, head_experssion);
+    }
+    END
+    {
+        LLVMPositionBuilderAtEnd($s.builder, exit_while);
+    }
+    ;
+
 returnOp [Context s]:
    RETURN e=expression [$s]
    {
@@ -373,6 +413,8 @@ ELSE  : 'ELSE'  ;
 ELSIF : 'ELSIF' ;
 TRUE  : 'TRUE'  ;
 FALSE : 'FALSE' ;
+WHILE : 'WHILE' ;
+DO    : 'DO'    ;
 
 PROCEDURE: 'PROCEDURE';
 
@@ -394,8 +436,10 @@ COMMA: ',' ;
 
 LEOP : '<=' ;
 GEOP : '>=' ;
+LTOP : '<' ;
+GTOP : '>' ;
 EQOP : '=' ;
-
+NQOP : '#' ;
 
 ASSIGN: ':=';
 

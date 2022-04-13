@@ -5,18 +5,22 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args ) {
-        // Show where we are.
-        System.out.println("Working Directory = " +
-                System.getProperty("user.dir"));
+        logger.info("Working Directory is {}", System.getProperty("user.dir"));
         Context.initializeTypeTable();
+
         BytePointer error = new BytePointer((Pointer)null); // Used to retrieve messages from functions
+
         LLVMLinkInMCJIT();
         LLVMInitializeNativeAsmPrinter();
         LLVMInitializeNativeAsmParser();
@@ -25,7 +29,7 @@ public class Main {
 
         for(String fileName: args) {
             try {
-                System.out.println(String.format("Processing file: '%s': ", fileName));
+                logger.info("Processing file: {}", fileName);
                 CharStream input = CharStreams.fromFileName(fileName);
 
                 org.isu.oberon.OberonLexer lexer = new org.isu.oberon.OberonLexer(input);
@@ -37,9 +41,10 @@ public class Main {
                 //LLVMVerifyModule(mod, LLVMAbortProcessAction, error);
                 //LLVMDisposeMessage(error); // Handler == LLVMAbortProcessAction -> No need to check errors
 
-                System.out.println("\n-------------------- dump ------------");
+                logger.info("------------ dump ------------");
                 LLVMDumpModule(s.getModule().mod);
-                System.out.println("\n-------------------- exec ------------");
+                logger.info("------------------------------");
+                logger.info("------------ exec ------------");
 
                 /*
                 LLVMExecutionEngineRef engine = new LLVMExecutionEngineRef();
@@ -71,14 +76,12 @@ public class Main {
 */
                 LLVMDisposeBuilder(s.builder);
 
-
-                System.out.println("\n--------------------------------------");
-                System.out.println("Translation: [SUCCESS]");
+                logger.info("------------------------------");
+                logger.info("Translation: [SUCCESS]");
             } catch (IOException e) {
-                System.out.println("[FAILURE]");
+                logger.error("Translation: [FAILURE]");
                 e.printStackTrace();
             }
         }
-        System.out.flush();
     }
 }
