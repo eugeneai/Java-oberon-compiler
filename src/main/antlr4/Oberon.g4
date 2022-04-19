@@ -363,7 +363,7 @@ repeatOp [Context s]:
     statementSequence[$s]
     UNTIL e = logicalExpression[$s]
     {
-        LLVMBuildCondBr($s.builder,$e.value.ref,repeat_block,repeat_end);
+        LLVMBuildCondBr($s.builder,$e.value.ref,repeat_end, repeat_block);
         LLVMPositionBuilderAtEnd($s.builder, repeat_end);
     }
     ;
