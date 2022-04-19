@@ -158,6 +158,7 @@ statement [Context s]:
    | returnOp [$s]
    | ifOp [$s]
    | whileOp [$s]
+   | repeatOp [$s]
    |
 ;
 
@@ -352,6 +353,21 @@ ifOp [Context s] locals [LLVMBasicBlockRef elsif_block, boolean else_happened ]:
    }
    ;
 
+repeatOp [Context s]:
+    REPEAT
+    {
+        LLVMBasicBlockRef repeat_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_repeat_block");
+        LLVMBasicBlockRef repeat_end = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_repeat_end");
+        LLVMPositionBuilderAtEnd($s.builder, repeat_block);
+    }
+    statementSequence[$s]
+    UNTIL e = logicalExpression[$s]
+    {
+        LLVMBuildCondBr($s.builder,$e.value.ref,repeat_block,repeat_end);
+        LLVMPositionBuilderAtEnd($s.builder, repeat_end);
+    }
+    ;
+
 whileOp [Context s]:
     {
         LLVMBasicBlockRef head_experssion = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_while_head");
@@ -399,7 +415,6 @@ returnOp [Context s]:
    ;
 
 
-
 /* Lexical rules */
 
 BEGIN : 'BEGIN' ;
@@ -415,6 +430,8 @@ TRUE  : 'TRUE'  ;
 FALSE : 'FALSE' ;
 WHILE : 'WHILE' ;
 DO    : 'DO'    ;
+REPEAT: 'REPEAT';
+UNTIL : 'UNTIL';
 
 PROCEDURE: 'PROCEDURE';
 
