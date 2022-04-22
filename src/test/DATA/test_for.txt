@@ -1,0 +1,10 @@
+MODULE testfor;
+VAR n, i:INTEGER;
+
+BEGIN
+n := 0;
+FOR i := 1 TO 128 BY 12 DO
+    n := n + i;
+END;
+RETURN n;
+END testfor.

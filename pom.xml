@@ -78,6 +78,7 @@
                         <argument>src/test/DATA/test_expr.txt</argument>
                         <argument>src/test/DATA/test_sqr.txt</argument>
                         <argument>src/test/DATA/test_repeat.txt</argument>
+                        <argument>src/test/DATA/test_for.txt</argument>
                     </arguments>
                 </configuration>
             </plugin>

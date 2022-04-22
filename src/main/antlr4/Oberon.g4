@@ -159,6 +159,7 @@ statement [Context s]:
    | ifOp [$s]
    | whileOp [$s]
    | repeatOp [$s]
+   | forOp [$s]
    |
 ;
 
@@ -281,11 +282,12 @@ term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type
     ;
 
 
-assignment [Context s]:
+assignment [Context s] returns [Value value]:
    id=IDENT ASSIGN e=expression [$s]
    {
         LLVMSetValueName($e.value.ref, $id.text);
         $s.setExpr($id.text, $e.value.ref);
+        $value=$e.value;
    }
    ;
 
@@ -414,6 +416,79 @@ returnOp [Context s]:
    }
    ;
 
+forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef do_for, LLVMBasicBlockRef exit_for, LLVMBasicBlockRef positive_inc, LLVMBasicBlockRef negative_inc, Value inc, LLVMValueRef from, Value to, NumberType type  ]:
+    {
+        $type = (IntegerType) $s.getType("INTEGER");
+        $inc = new Value($type, $type.genConstant($s, "1"));
+        /*$is_inc_positive = new Value($type, $type.genConstant($s, "TRUE")).ref;*/
+        LLVMBasicBlockRef head_expression = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_for_head");
+        LLVMBasicBlockRef do_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_for");
+        LLVMBasicBlockRef exit_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_for");
+    }
+
+    FOR e=assignment [$s]
+        {
+            $from=$e.value.ref;
+            LLVMPositionBuilderAtEnd($s.builder, head_expression);
+        }
+    TO ee=expression [$s]
+        {
+            $to=$ee.value;
+        }
+    (
+         BY eee=expression [$s]
+         {
+            $inc=$eee.value;
+            /*$is_inc_positive = LLVMBuildICmp($s.builder, LLVMIntSGE, $inc.ref, (new Value($type, $type.genConstant($s, "0"))).ref, "");*/
+         }
+    )?
+    DO
+        {
+            $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
+
+            LLVMBuildCondBr($s.builder,
+                            LLVMBuildICmp($s.builder, LLVMIntSGE, $inc.ref, (new Value($type, $type.genConstant($s, "0"))).ref, ""),
+                            positive_inc,
+                            negative_inc);
+
+
+            /*if($is_inc_positive) {
+
+
+            }
+            else {
+
+            }*/
+
+            LLVMBasicBlockRef positive_inc = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"positive_inc");
+
+            LLVMBuildCondBr($s.builder,
+                             LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
+                             do_for,
+                             exit_for);
+
+            LLVMPositionBuilderAtEnd($s.builder, positive_inc);
+
+
+            LLVMBasicBlockRef negative_inc = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"negative_inc");
+
+            LLVMBuildCondBr($s.builder,
+                             LLVMBuildICmp($s.builder, LLVMIntSGE, $from, $to.ref, ""),
+                             do_for,
+                             exit_for);
+
+            LLVMPositionBuilderAtEnd($s.builder, negative_inc);
+
+
+            LLVMPositionBuilderAtEnd($s.builder, do_for);
+        }
+    statementSequence[$s]
+    END
+        {
+            LLVMPositionBuilderAtEnd($s.builder, exit_for);
+        }
+    ;
+
 
 /* Lexical rules */
 
@@ -431,7 +506,10 @@ FALSE : 'FALSE' ;
 WHILE : 'WHILE' ;
 DO    : 'DO'    ;
 REPEAT: 'REPEAT';
-UNTIL : 'UNTIL';
+UNTIL : 'UNTIL' ;
+FOR   : 'FOR'   ;
+TO    : 'TO'    ;
+BY    : 'BY'    ;
 
 PROCEDURE: 'PROCEDURE';
 
