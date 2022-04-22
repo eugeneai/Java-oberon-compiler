@@ -435,7 +435,7 @@ forOp [Context s] locals [ Value inc, LLVMValueRef from, Value to, NumberType ty
             {
                 $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
                 LLVMBuildCondBr($s.builder,
-                                LLVMBuildICmp($s.builder, 0, $from, $to.ref, ""),
+                                LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
                                 do_for,
                                 exit_for);
                 LLVMPositionBuilderAtEnd($s.builder, do_for);
