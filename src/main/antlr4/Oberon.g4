@@ -416,7 +416,7 @@ returnOp [Context s]:
    }
    ;
 
-forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef do_for, LLVMBasicBlockRef exit_for, LLVMBasicBlockRef positive_inc, LLVMBasicBlockRef negative_inc, Value inc, LLVMValueRef from, Value to, NumberType type  ]:
+forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef do_for, LLVMBasicBlockRef exit_for, Value inc, LLVMValueRef from, Value to, NumberType type  ]:
     {
         $type = (IntegerType) $s.getType("INTEGER");
         $inc = new Value($type, $type.genConstant($s, "1"));
@@ -440,38 +440,19 @@ forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef 
             $inc=$eee.value;
          }
     )?
-    DO
+    DO statementSequence[$s]
         {
             $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
-
-            LLVMBasicBlockRef positive_inc = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"positive_inc");
-
             LLVMBuildCondBr($s.builder,
                             LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
                             do_for,
                             exit_for);
 
-            LLVMPositionBuilderAtEnd($s.builder, positive_inc);
-
-            LLVMBasicBlockRef negative_inc = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"negative_inc");
-
-            LLVMBuildCondBr($s.builder,
-                            LLVMBuildICmp($s.builder, LLVMIntSGE, $from, $to.ref, ""),
-                            do_for,
-                            exit_for);
-
-            LLVMPositionBuilderAtEnd($s.builder, negative_inc);
-
-
-            LLVMBuildCondBr($s.builder,
-                            LLVMBuildICmp($s.builder, LLVMIntSGE, $inc.ref, (new Value($type, $type.genConstant($s, "0"))).ref, ""),
-                            positive_inc,
-                            negative_inc);
-
 
             LLVMPositionBuilderAtEnd($s.builder, do_for);
+
+            LLVMBuildBr($s.builder, head_expression);
         }
-    statementSequence[$s]
     END
         {
             LLVMPositionBuilderAtEnd($s.builder, exit_for);
