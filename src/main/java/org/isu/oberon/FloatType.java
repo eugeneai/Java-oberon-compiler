@@ -1,10 +1,13 @@
 package org.isu.oberon;
 
 import org.bytedeco.llvm.LLVM.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.bytedeco.llvm.global.LLVM.*;
 
 public class FloatType extends NumberType {
+    private static final Logger logger = LoggerFactory.getLogger(FloatType.class);
     public FloatType() {
         super("FLOAT");
     }
@@ -26,7 +29,8 @@ public class FloatType extends NumberType {
                 res = LLVMBuildFDiv(s.builder, arg1.ref, arg2.ref, ""); // FIXME: Signed op.
                 break;
             default:
-                System.out.println("Wrong floating-point operation!");
+
+                logger.error("Wrong floating-point operation");
                 System.exit(1);
                 return null;
         }

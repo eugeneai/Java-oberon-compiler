@@ -157,11 +157,25 @@ statement [Context s]:
      assignment [$s]
    | returnOp [$s]
    | ifOp [$s]
+   | whileOp [$s]
+   | repeatOp [$s]
+   | forOp [$s]
    |
 ;
 
 logicalOp returns [int value]:
     EQOP { $value = $EQOP.type; }
+    |
+    LEOP { $value = $LEOP.type; }
+    |
+    GEOP { $value = $GEOP.type; }
+    |
+    NQOP { $value = $NQOP.type; }
+    |
+    LTOP { $value = $LTOP.type; }
+    |
+    GTOP { $value = $GTOP.type; }
+    |
     ;
 
 logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, BooleanType type]:
@@ -268,11 +282,12 @@ term [Context s] returns [Value value] locals [LLVMValueRef ref, NumberType type
     ;
 
 
-assignment [Context s]:
+assignment [Context s] returns [Value value]:
    id=IDENT ASSIGN e=expression [$s]
    {
         LLVMSetValueName($e.value.ref, $id.text);
         $s.setExpr($id.text, $e.value.ref);
+        $value=$e.value;
    }
    ;
 
@@ -340,6 +355,49 @@ ifOp [Context s] locals [LLVMBasicBlockRef elsif_block, boolean else_happened ]:
    }
    ;
 
+repeatOp [Context s]:
+    REPEAT
+    {
+        LLVMBasicBlockRef repeat_block = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_repeat_block");
+        LLVMBasicBlockRef repeat_end = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_repeat_end");
+        LLVMPositionBuilderAtEnd($s.builder, repeat_block);
+    }
+    statementSequence[$s]
+    UNTIL e = logicalExpression[$s]
+    {
+        LLVMBuildCondBr($s.builder,$e.value.ref,repeat_end, repeat_block);
+        LLVMPositionBuilderAtEnd($s.builder, repeat_end);
+    }
+    ;
+
+whileOp [Context s]:
+    {
+        LLVMBasicBlockRef head_experssion = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_while_head");
+        LLVMBasicBlockRef do_while = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_while");
+        LLVMBasicBlockRef exit_while = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_while");
+    }
+    WHILE
+    {
+        LLVMPositionBuilderAtEnd($s.builder, head_experssion);
+    }
+    e=logicalExpression[$s]
+    {
+        LLVMBuildCondBr($s.builder,$e.value.ref,do_while,exit_while);
+    }
+    DO
+    {
+        LLVMPositionBuilderAtEnd($s.builder, do_while);
+    }
+    statementSequence[$s]
+    {
+        LLVMBuildBr($s.builder, head_experssion);
+    }
+    END
+    {
+        LLVMPositionBuilderAtEnd($s.builder, exit_while);
+    }
+    ;
+
 returnOp [Context s]:
    RETURN e=expression [$s]
    {
@@ -358,6 +416,48 @@ returnOp [Context s]:
    }
    ;
 
+forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef do_for, LLVMBasicBlockRef exit_for, Value inc, LLVMValueRef from, Value to, NumberType type  ]:
+    {
+        $type = (IntegerType) $s.getType("INTEGER");
+        $inc = new Value($type, $type.genConstant($s, "1"));
+        LLVMBasicBlockRef head_expression = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_for_head");
+        LLVMBasicBlockRef do_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_for");
+        LLVMBasicBlockRef exit_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_for");
+    }
+
+    FOR e=assignment [$s]
+        {
+            $from=$e.value.ref;
+            LLVMPositionBuilderAtEnd($s.builder, head_expression);
+        }
+    TO ee=expression [$s]
+        {
+            $to=$ee.value;
+        }
+    (
+         BY eee=expression [$s]
+         {
+            $inc=$eee.value;
+         }
+    )?
+    DO statementSequence[$s]
+        {
+            $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
+            LLVMBuildCondBr($s.builder,
+                            LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
+                            do_for,
+                            exit_for);
+
+
+            LLVMPositionBuilderAtEnd($s.builder, do_for);
+
+            LLVMBuildBr($s.builder, head_expression);
+        }
+    END
+        {
+            LLVMPositionBuilderAtEnd($s.builder, exit_for);
+        }
+    ;
 
 
 /* Lexical rules */
@@ -373,6 +473,13 @@ ELSE  : 'ELSE'  ;
 ELSIF : 'ELSIF' ;
 TRUE  : 'TRUE'  ;
 FALSE : 'FALSE' ;
+WHILE : 'WHILE' ;
+DO    : 'DO'    ;
+REPEAT: 'REPEAT';
+UNTIL : 'UNTIL' ;
+FOR   : 'FOR'   ;
+TO    : 'TO'    ;
+BY    : 'BY'    ;
 
 PROCEDURE: 'PROCEDURE';
 
@@ -394,8 +501,10 @@ COMMA: ',' ;
 
 LEOP : '<=' ;
 GEOP : '>=' ;
+LTOP : '<' ;
+GTOP : '>' ;
 EQOP : '=' ;
-
+NQOP : '#' ;
 
 ASSIGN: ':=';
 

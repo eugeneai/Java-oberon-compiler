@@ -1,4 +1,15 @@
-MODULE testsimple;
+MODULE testop;
+VAR n:INTEGER;
+
+PROCEDURE sqr(n:INTEGER):INTEGER;
 BEGIN
-RETURN 1+2*3+4;
-END testsimple.
+  RETURN n*n;
+END sqr;
+
+BEGIN
+n := 2;
+WHILE n >= sqr(4) DO
+    n := sqr(n)
+END;
+RETURN n;
+END testop.

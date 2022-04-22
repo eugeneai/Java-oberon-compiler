@@ -1,0 +1,14 @@
+MODULE testrepeat;
+VAR n:INTEGER;
+
+PROCEDURE fun(n:INTEGER):INTEGER;
+BEGIN
+  RETURN n*n;
+END sqr;
+
+BEGIN
+n:=2;
+REPEAT n := fun(n); UNTIL n <= 128;
+n := n + 2;
+RETURN n;
+END testrepeat.
