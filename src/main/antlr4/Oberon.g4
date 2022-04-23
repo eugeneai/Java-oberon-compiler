@@ -416,48 +416,41 @@ returnOp [Context s]:
    }
    ;
 
-forOp [Context s] locals [ LLVMBasicBlockRef head_expression, LLVMBasicBlockRef do_for, LLVMBasicBlockRef exit_for, Value inc, LLVMValueRef from, Value to, NumberType type  ]:
-    {
-        $type = (IntegerType) $s.getType("INTEGER");
-        $inc = new Value($type, $type.genConstant($s, "1"));
-        LLVMBasicBlockRef head_expression = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_for_head");
-        LLVMBasicBlockRef do_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_for");
-        LLVMBasicBlockRef exit_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_for");
-    }
-
-    FOR e=assignment [$s]
-        {
-            $from=$e.value.ref;
-            LLVMPositionBuilderAtEnd($s.builder, head_expression);
-        }
-    TO ee=expression [$s]
-        {
-            $to=$ee.value;
-        }
-    (
-         BY eee=expression [$s]
-         {
-            $inc=$eee.value;
-         }
-    )?
-    DO statementSequence[$s]
-        {
-            $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
-            LLVMBuildCondBr($s.builder,
-                            LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
-                            do_for,
-                            exit_for);
+forOp [Context s] locals [ Value inc, LLVMValueRef from, Value to, NumberType type  ]:
 
 
-            LLVMPositionBuilderAtEnd($s.builder, do_for);
+        FOR IDENT ASSIGN e=expression [$s] TO ee=expression [$s]
+            {
+                $type = (IntegerType) $s.getType("INTEGER");
+                $inc = new Value($type, $type.genConstant($s, "1"));
 
-            LLVMBuildBr($s.builder, head_expression);
-        }
-    END
-        {
-            LLVMPositionBuilderAtEnd($s.builder, exit_for);
-        }
-    ;
+                LLVMBasicBlockRef do_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_do_for");
+                LLVMBasicBlockRef exit_for = LLVMAppendBasicBlock($s.proc.proc, $s.proc.name+"_exit_for");
+
+                $from=$e.value.ref;
+                $to=$ee.value;
+            }
+
+        DO
+            {
+                $from = LLVMBuildAdd($s.builder, $from, $inc.ref, "");
+                LLVMBuildCondBr($s.builder,
+                                LLVMBuildICmp($s.builder, LLVMIntSLE, $from, $to.ref, ""),
+                                do_for,
+                                exit_for);
+                LLVMPositionBuilderAtEnd($s.builder, do_for);
+
+                System.out.println("check");
+            }
+            statementSequence[$s]
+            {
+            LLVMBuildBr($s.builder, do_for);
+            }
+        END
+            {
+                LLVMPositionBuilderAtEnd($s.builder, exit_for);
+            }
+        ;
 
 
 /* Lexical rules */
