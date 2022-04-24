@@ -189,7 +189,7 @@ logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, Bo
 
 expression [Context s] returns [Value value]
     :
-        m=mult[$s]
+        m=mult[$s] { $value = $m.value; }
     (
         op=pm
         e=expression[$s]
@@ -207,7 +207,7 @@ pm returns [int value]
 
 mult [Context s] returns [Value value]
     :
-        t=term[$s]
+        t=term[$s] { $value = $t.value; }
     (
         op=md
         m=mult[$s]
