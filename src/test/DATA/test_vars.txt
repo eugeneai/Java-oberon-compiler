@@ -3,6 +3,13 @@ VAR
    i,j:INTEGER;
    k:INTEGER;
 
+PROCEDURE test(x:INTEGER);
+   VAR a:INTEGER;
+BEGIN
+   a:=10;
+END test;
+
+
 BEGIN
   j:=1;
   i:=1 * 9 + 2 * 8;

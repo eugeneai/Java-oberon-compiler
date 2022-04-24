@@ -81,6 +81,17 @@
                     </arguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <fork>true</fork>
+                    <executable>C:/tmp/java/jdk-18.0.1/bin/javac</executable>
+                    <compilerVersion>1.8</compilerVersion>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

@@ -10,6 +10,9 @@ public class IntegerType extends NumberType {
     public Value infixOp(Context s, Value arg1, int op, Value arg2)
     {
         LLVMValueRef res;
+        System.out.println(arg1.ref);
+        System.out.println(arg2.ref);
+
         switch (op) {
             case org.isu.oberon.OberonParser.PLUS:
                 res = LLVMBuildAdd(s.builder, arg1.ref, arg2.ref, "");

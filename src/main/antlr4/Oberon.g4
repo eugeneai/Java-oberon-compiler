@@ -41,18 +41,16 @@ module [OberonParser parser] returns [Context s]
 
 block [Context s]:
     BEGIN
-     (
        statementSequence [$s]
-     ) ?
     END
     ;
 
 declarationSequence [Context s]:
-      ( VAR (variableListDeclaration [$s, -1] SEMI ) + )?
-      ( procedureDeclaration [$s] SEMI ) *
+      ( VAR (variableListDeclaration [$s] SEMI ) + |
+      procedureDeclaration [$s] SEMI ) *
     ;
 
-variableListDeclaration [Context s, int index] returns [int nextIndex] locals [Vector<String> vars]:
+variableListDeclaration [Context s] locals [Vector<String> vars]:
    id=IDENT
         {
             $vars = new Vector<String>();
@@ -80,14 +78,7 @@ variableListDeclaration [Context s, int index] returns [int nextIndex] locals [V
             TypeSymbol t = $s.getType($ty.text);
             for (String var: $vars) {
                 VarSymbol var_s = $s.addVariable(var, $ty.text);
-                if ($index >= 0) {
-                    $s.proc.args.add(var_s);
-                    $index++;
-                } else {
-
-                }
             };
-            $nextIndex=$index;
         }
    ;
 
@@ -95,6 +86,7 @@ procedureDeclaration [Context c]
    :
       h=procedureHeading [$c]
       SEMI
+      ( VAR (variableListDeclaration [$h.fc] SEMI ) + )?
       procedureBody [$h.fc, $h.name] // FIXME:fc
    ;
 
@@ -114,9 +106,9 @@ procedureHeading [Context c] returns [String name, Context fc] locals [TypeSymbo
    (
        LPAR
        (
-              ni=variableListDeclaration [$fc, 0]
+              variableListDeclaration [$fc]
               (
-                 SEMI ni=variableListDeclaration [$fc, $ni.nextIndex]
+                 SEMI variableListDeclaration [$fc]
               )*
        )?
        RPAR   // FIXME: Add Variables
@@ -197,13 +189,13 @@ logicalExpression [Context s] returns [Value value] locals [LLVMValueRef ref, Bo
 
 expression [Context s] returns [Value value]
     :
-        m=mult[$s] { $value = $m.value; }
+        m=mult[$s]
     (
         op=pm
         e=expression[$s]
            {
                 NumberType type = $s.infixTypeCast($value, $op.value, $e.value, $s); // FIXME: returns typecast;
-                $value = type.infixOp($s, $value, $op.value, $e.value);
+                $value = type.infixOp($s, $m.value, $op.value, $e.value);
            }
     )*
     ;
@@ -215,13 +207,13 @@ pm returns [int value]
 
 mult [Context s] returns [Value value]
     :
-        t=term[$s] { $value = $t.value; }
+        t=term[$s]
     (
         op=md
         m=mult[$s]
            {
                 NumberType type = $s.infixTypeCast($value, $op.value, $m.value, $s); // FIXME: returns typecast;
-                $value = type.infixOp($s, $value, $op.value, $m.value);
+                $value = type.infixOp($s, $t.value, $op.value, $m.value);
            }
     )*
     ;

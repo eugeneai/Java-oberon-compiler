@@ -67,6 +67,8 @@ public class Context {
 
     public Value getRef(String name) {
         VarSymbol var = (VarSymbol) getCurrent().get(name);
+        System.out.print("getRef var:");
+        System.out.println(var.name);
         return new Value(var.type, var.ref);
     }
 
